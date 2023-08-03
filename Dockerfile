@@ -1,6 +1,6 @@
 FROM surnet/alpine-python-wkhtmltopdf:3.11.4-0.12.6-small
-COPY . /app
 
+COPY . /app
 WORKDIR /app
 
 ENV PIP_BREAK_SYSTEM_PACKAGES 1
