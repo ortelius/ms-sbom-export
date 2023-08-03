@@ -1,8 +1,0 @@
----
-apiVersion: v2
-description: Dependency Packages
-icon: https://ortelius.github.io/ortelius-charts/logo.png
-name: dh-ms-sbom
-type: application
-version: 10.0.92
-appVersion: 10.0.92
