@@ -23,9 +23,7 @@
   "paths": {
     "/health": {
       "get": {
-        "tags": [
-          "health"
-        ],
+        "tags": ["health"],
         "summary": "Health",
         "description": "This health check end point used by Kubernetes",
         "operationId": "health_health_get",
@@ -45,9 +43,7 @@
     },
     "/msapi/sbom": {
       "get": {
-        "tags": [
-          "sbom"
-        ],
+        "tags": ["sbom"],
         "summary": "Export Sbom",
         "description": "This is the end point used to create PDF of the Application/Component SBOM",
         "operationId": "export_sbom_msapi_sbom_get",
@@ -135,10 +131,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "status",
-          "service_name"
-        ],
+        "required": ["status", "service_name"],
         "title": "StatusMsg"
       },
       "ValidationError": {
@@ -167,11 +160,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "loc",
-          "msg",
-          "type"
-        ],
+        "required": ["loc", "msg", "type"],
         "title": "ValidationError"
       }
     }
