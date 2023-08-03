@@ -4,5 +4,5 @@ description: Dependency Packages
 icon: https://ortelius.github.io/ortelius-charts/logo.png
 name: ms-sbom-export
 type: application
-version: 10.0.92
-appVersion: 10.0.92
+version: 10.0.0
+appVersion: 10.0.0
