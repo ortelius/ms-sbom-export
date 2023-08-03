@@ -163,6 +163,11 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None)
 
                     df_pkgs = pd.read_sql(sql.text(sqlstmt), connection, params={"objid": objid})
 
+                    high_table = ""
+                    medium_table = ""
+                    low_table = ""
+                    good_table = ""
+
                     if len(df_pkgs.index) > 0:
                         sqlstmt = """
                             select distinct id, packagename, packageversion, purl, summary as cve_summary, risklevel from dm.dm_vulns
@@ -192,247 +197,243 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None)
                         low_table = df.loc[df["Risk Level"] == "Low"].drop("Risk Level", axis=1).to_html(classes=["gold-table"], index=False, escape=False, render_links=True)
                         good_table = df.loc[df["Risk Level"] == ""].drop("Risk Level", axis=1).to_html(classes=["blue-table"], index=False, escape=False, render_links=True)
 
-                        params = tuple(str())
-                        objname = ""
+                    params = tuple(str())
+                    objname = ""
 
-                        if compid is not None:
-                            params = (str(compid),)
+                    if compid is not None:
+                        params = (str(compid),)
 
-                            cursor.execute("select name from dm.dm_component where id = %s", params)
-                            rows = cursor.fetchall()
-
-                            for row in rows:
-                                objname = "Component<br>" + row[0]
-
-                            sqlstmt = """
-                                select distinct fulldomain(b.domainid, b.name), fulldomain(r.domainid, r.name) "repository", target "targetdirectory",
-                                    kind, buildid, buildurl, chart, builddate, dockerrepo, dockersha, gitcommit,
-                                    gitrepo, gittag, giturl, chartversion, chartnamespace, dockertag, chartrepo,
-                                    chartrepourl, c.id "serviceownerid", c.realname "serviceowner", c.email "serviceowneremail", c.phone "serviceownerphone",
-                                    slackchannel, discordchannel, hipchatchannel, pagerdutyurl, pagerdutybusinessurl
-                                    from dm.dm_componentitem a, dm.dm_component b, dm.dm_user c, dm.dm_repository r
-                                    where a.compid = b.id and b.ownerid = c.id and a.repositoryid = r.id and a.compid = %s
-                                union
-                                    select fulldomain(b.domainid, b.name), null, target "targetdirectory",
-                                    kind, buildid, buildurl, chart, builddate, dockerrepo, dockersha, gitcommit,
-                                    gitrepo, gittag, giturl, chartversion, chartnamespace, dockertag, chartrepo,
-                                    chartrepourl, c.id "serviceownerid", c.realname "serviceowner", c.email "serviceowneremail", c.phone "serviceownerphone",
-                                    slackchannel, discordchannel, hipchatchannel, pagerdutyurl, pagerdutybusinessurl
-                                    from dm.dm_componentitem a, dm.dm_component b, dm.dm_user c
-                                    where a.compid = b.id and b.ownerid = c.id and a.repositoryid is null and a.compid = %s
-                                """
-
-                            params = (
-                                str(compid),
-                                str(compid),
-                            )
-                        else:
-                            params = (str(appid),)
-
-                            cursor.execute("select name from dm.dm_application where id = %s", params)
-                            rows = cursor.fetchall()
-                            for row in rows:
-                                objname = "Application<br>" + row[0]
-
-                            sqlstmt = """
-                                select distinct fulldomain(b.domainid, b.name), fulldomain(r.domainid, r.name) "repository", target "targetdirectory",
-                                    kind, buildid, buildurl, chart, builddate, dockerrepo, dockersha, gitcommit,
-                                    gitrepo, gittag, giturl, chartversion, chartnamespace, dockertag, chartrepo,
-                                    chartrepourl, c.id "serviceownerid", c.realname "serviceowner", c.email "serviceowneremail", c.phone "serviceownerphone",
-                                    slackchannel, discordchannel, hipchatchannel, pagerdutyurl, pagerdutybusinessurl
-                                    from dm.dm_componentitem a, dm.dm_component b, dm.dm_user c, dm.dm_repository r
-                                    where a.compid = b.id and b.ownerid = c.id and a.repositoryid = r.id
-                                    and b.status = 'N'
-                                    and a.compid in (select compid from dm.dm_applicationcomponent where appid = %s)
-                                union
-                                    select fulldomain(b.domainid, b.name), null, target "targetdirectory",
-                                    kind, buildid, buildurl, chart, builddate, dockerrepo, dockersha, gitcommit,
-                                    gitrepo, gittag, giturl, chartversion, chartnamespace, dockertag, chartrepo,
-                                    chartrepourl, c.id "serviceownerid", c.realname "serviceowner", c.email "serviceowneremail", c.phone "serviceownerphone",
-                                    slackchannel, discordchannel, hipchatchannel, pagerdutyurl, pagerdutybusinessurl
-                                    from dm.dm_componentitem a, dm.dm_component b, dm.dm_user c
-                                    where a.compid = b.id and b.ownerid = c.id and a.repositoryid is null
-                                    and b.status = 'N'
-                                    and a.compid in (select compid from dm.dm_applicationcomponent where appid = %s)
-                                """
-
-                            params = (
-                                str(appid),
-                                str(appid),
-                            )
-
-                        cursor.execute(sqlstmt, params)
+                        cursor.execute("select name from dm.dm_component where id = %s", params)
                         rows = cursor.fetchall()
-                        comptable = ""
+
                         for row in rows:
-                            compname = row[0]
-                            row[1]
-                            row[2]
-                            row[3]
-                            buildid = row[4]
-                            buildurl = row[5]
-                            chart = row[6]
-                            builddate = row[7]
-                            dockerrepo = row[8]
-                            dockersha = row[9]
-                            gitcommit = row[10]
-                            gitrepo = row[11]
-                            gittag = row[12]
-                            giturl = row[13]
-                            chartversion = row[14]
-                            chartnamespace = row[15]
-                            dockertag = row[16]
-                            chartrepo = row[17]
-                            chartrepourl = row[18]
-                            row[19]
-                            serviceowner = row[20]
-                            serviceowneremail = row[21]
-                            serviceownerphone = row[22]
-                            slackchannel = row[23]
-                            discordchannel = row[24]
-                            hipchatchannel = row[25]
-                            pagerdutyurl = row[26]
-                            pagerdutybusinessurl = row[27]
+                            objname = "Component<br>" + row[0]
 
-                            comp = f"""
-                                <div style="width: 100%;"><h3>{compname}</h3>
-                                    <div id="compsum" style="width: 50%; float: left;">
-                                        <table id="compowner_summ" class="dev-table">
-                                            <tr id="serviceowner_sumrow"><td class="summlabel">Service Owner:</td><td>{serviceowner}</td></tr>
-                                            <tr id="serviceowneremail_sumrow"><td class="summlabel">Service Owner Email:</td><td>{serviceowneremail}</td></tr>
-                                            <tr id="serviceownerphone_sumrow"><td class="summlabel">Service Owner Phone:</td><td>{serviceownerphone}</td></tr>
-                                            <tr id="pagerdutybusinessserviceurl_sumrow"><td class="summlabel">PagerDuty Business Service Url:</td><td>{pagerdutybusinessurl}</td></tr>
-                                            <tr id="pagerdutyserviceurl_sumrow"><td class="summlabel">PagerDuty Service Url:</td><td>{pagerdutyurl}</td></tr>
-                                            <tr id="slackchannel_sumrow"><td class="summlabel">Slack Channel:</td><td>{slackchannel}</td></tr>
-                                            <tr id="discordchannel_sumrow"><td class="summlabel">Discord Channel:</td><td>{discordchannel}</td></tr>
-                                            <tr id="hipchatchannel_sumrow"><td class="summlabel">HipChat Channel:</td><td>{hipchatchannel}</td></tr>
-                                            <tr id="gitcommit_sumrow"><td class="summlabel">Git Commit:</td><td>{gitcommit}</td></tr>
-                                            <tr id="gitrepo_sumrow"><td class="summlabel">Git Repo:</td><td>{gitrepo}</td></tr>
-                                            <tr id="gittag_sumrow"><td class="summlabel">Git Tag:</td><td>{gittag}</td></tr>
-                                            <tr id="giturl_sumrow"><td class="summlabel">Git URL:</td><td>{giturl}</td></tr>
-                                        </table>
-                                    </div>
-
-                                    <div id="compdetail" style="margin-left: 50%;">
-                                        <table id="compitem" class="dev-table">
-                                            <tr id="builddate_sumrow"><td class="summlabel">Build Date:</td><td>{builddate}</td></tr>
-                                            <tr id="buildid_sumrow"><td class="summlabel">Build Id:</td><td>{buildid}</td></tr>
-                                            <tr id="buildurl_sumrow"><td class="summlabel">Build URL:</td><td>{buildurl}</td></tr>
-                                            <tr id="containerregistry_sumrow"><td class="summlabel">Container Registry:</td><td>{dockerrepo}</td></tr>
-                                            <tr id="containerdigest_sumrow"><td class="summlabel">Container Digest:</td><td>{dockersha}</td></tr>
-                                            <tr id="containertag_sumrow"><td class="summlabel">Container Tag:</td><td>{dockertag}</td></tr>
-                                            <tr id="helmchart_sumrow"><td class="summlabel">Helm Chart:</td><td>{chart}</td></tr>
-                                            <tr id="helmchartnamespace_sumrow"><td class="summlabel">Helm Chart Namespace:</td><td>{chartnamespace}</td></tr>
-                                            <tr id="helmchartrepo_sumrow"><td class="summlabel">Helm Chart Repo:</td><td>{chartrepo}</td></tr>
-                                            <tr id="helmchartrepourl_sumrow"><td class="summlabel">Helm Chart Repo Url:</td><td>{chartrepourl}</td></tr>
-                                            <tr id="helmchartversion_sumrow"><td class="summlabel">Helm Chart Version:</td><td>{chartversion}</td></tr>
-                                        </table>
-                                    </div>
-                                </div>
-                                <br>
+                        sqlstmt = """
+                            select distinct fulldomain(b.domainid, b.name), fulldomain(r.domainid, r.name) "repository", target "targetdirectory",
+                                kind, buildid, buildurl, chart, builddate, dockerrepo, dockersha, gitcommit,
+                                gitrepo, gittag, giturl, chartversion, chartnamespace, dockertag, chartrepo,
+                                chartrepourl, c.id "serviceownerid", c.realname "serviceowner", c.email "serviceowneremail", c.phone "serviceownerphone",
+                                slackchannel, discordchannel, hipchatchannel, pagerdutyurl, pagerdutybusinessurl
+                                from dm.dm_componentitem a, dm.dm_component b, dm.dm_user c, dm.dm_repository r
+                                where a.compid = b.id and b.ownerid = c.id and a.repositoryid = r.id and a.compid = %s
+                            union
+                                select fulldomain(b.domainid, b.name), null, target "targetdirectory",
+                                kind, buildid, buildurl, chart, builddate, dockerrepo, dockersha, gitcommit,
+                                gitrepo, gittag, giturl, chartversion, chartnamespace, dockertag, chartrepo,
+                                chartrepourl, c.id "serviceownerid", c.realname "serviceowner", c.email "serviceowneremail", c.phone "serviceownerphone",
+                                slackchannel, discordchannel, hipchatchannel, pagerdutyurl, pagerdutybusinessurl
+                                from dm.dm_componentitem a, dm.dm_component b, dm.dm_user c
+                                where a.compid = b.id and b.ownerid = c.id and a.repositoryid is null and a.compid = %s
                             """
 
-                            comptable = comptable + comp
+                        params = (
+                            str(compid),
+                            str(compid),
+                        )
+                    else:
+                        params = (str(appid),)
 
-                        cursor.close()
-                        rptdate = datetime.datetime.now().astimezone().strftime("%B %d, %Y at %I:%M %p %Z")
-                        cover_url = os.getenv("COVER_URL", "https://ortelius.io/images/sbom-cover.svg")
+                        cursor.execute("select name from dm.dm_application where id = %s", params)
+                        rows = cursor.fetchall()
+                        for row in rows:
+                            objname = "Application<br>" + row[0]
 
-                        cover_html = f"""
-                            <html>
-                            <head>
-                                <title>SBOM Report</title>
-                                <style>
-                                    body {{
-                                        font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
-                                    }}
+                        sqlstmt = """
+                            select distinct fulldomain(b.domainid, b.name), fulldomain(r.domainid, r.name) "repository", target "targetdirectory",
+                                kind, buildid, buildurl, chart, builddate, dockerrepo, dockersha, gitcommit,
+                                gitrepo, gittag, giturl, chartversion, chartnamespace, dockertag, chartrepo,
+                                chartrepourl, c.id "serviceownerid", c.realname "serviceowner", c.email "serviceowneremail", c.phone "serviceownerphone",
+                                slackchannel, discordchannel, hipchatchannel, pagerdutyurl, pagerdutybusinessurl
+                                from dm.dm_componentitem a, dm.dm_component b, dm.dm_user c, dm.dm_repository r
+                                where a.compid = b.id and b.ownerid = c.id and a.repositoryid = r.id
+                                and b.status = 'N'
+                                and a.compid in (select compid from dm.dm_applicationcomponent where appid = %s)
+                            union
+                                select fulldomain(b.domainid, b.name), null, target "targetdirectory",
+                                kind, buildid, buildurl, chart, builddate, dockerrepo, dockersha, gitcommit,
+                                gitrepo, gittag, giturl, chartversion, chartnamespace, dockertag, chartrepo,
+                                chartrepourl, c.id "serviceownerid", c.realname "serviceowner", c.email "serviceowneremail", c.phone "serviceownerphone",
+                                slackchannel, discordchannel, hipchatchannel, pagerdutyurl, pagerdutybusinessurl
+                                from dm.dm_componentitem a, dm.dm_component b, dm.dm_user c
+                                where a.compid = b.id and b.ownerid = c.id and a.repositoryid is null
+                                and b.status = 'N'
+                                and a.compid in (select compid from dm.dm_applicationcomponent where appid = %s)
+                            """
 
-                                    .coverpage {{
-                                        margin: 0;
-                                        padding: 0;
-                                        height: 890px;
-                                        width: 1157px;
-                                    }}
+                        params = (
+                            str(appid),
+                            str(appid),
+                        )
 
-                                    .rptdate {{
-                                      position: absolute;
-                                      top: 770px;
-                                      left: 72%;
-                                      font-size: 1.3em;
-                                      color: white;
-                                    }}
+                    cursor.execute(sqlstmt, params)
+                    rows = cursor.fetchall()
+                    comptable = ""
+                    for row in rows:
+                        compname = row[0]
+                        buildid = row[4]
+                        buildurl = row[5]
+                        chart = row[6]
+                        builddate = row[7]
+                        dockerrepo = row[8]
+                        dockersha = row[9]
+                        gitcommit = row[10]
+                        gitrepo = row[11]
+                        gittag = row[12]
+                        giturl = row[13]
+                        chartversion = row[14]
+                        chartnamespace = row[15]
+                        dockertag = row[16]
+                        chartrepo = row[17]
+                        chartrepourl = row[18]
+                        serviceowner = row[20]
+                        serviceowneremail = row[21]
+                        serviceownerphone = row[22]
+                        slackchannel = row[23]
+                        discordchannel = row[24]
+                        hipchatchannel = row[25]
+                        pagerdutyurl = row[26]
+                        pagerdutybusinessurl = row[27]
 
-                                    .objname {{
-                                      position: absolute;
-                                      top: 720px;
-                                      font-size: 2em;
-                                      left: 15px;
-                                      color: white;
-                                    }}
-                                </style>
-                            </head>
-                            <body>
-                                <div>
-                                    <div class="coverpage">
-                                        <img src="{cover_url}" />
-                                        <div class="objname">{objname}</div>
-                                        <p class="rptdate">{rptdate}</p>
-                                    </div>
+                        comp = f"""
+                            <div style="width: 100%;"><h3>{compname}</h3>
+                                <div id="compsum" style="width: 50%; float: left;">
+                                    <table id="compowner_summ" class="dev-table">
+                                        <tr id="serviceowner_sumrow"><td class="summlabel">Service Owner:</td><td>{serviceowner}</td></tr>
+                                        <tr id="serviceowneremail_sumrow"><td class="summlabel">Service Owner Email:</td><td>{serviceowneremail}</td></tr>
+                                        <tr id="serviceownerphone_sumrow"><td class="summlabel">Service Owner Phone:</td><td>{serviceownerphone}</td></tr>
+                                        <tr id="pagerdutybusinessserviceurl_sumrow"><td class="summlabel">PagerDuty Business Service Url:</td><td>{pagerdutybusinessurl}</td></tr>
+                                        <tr id="pagerdutyserviceurl_sumrow"><td class="summlabel">PagerDuty Service Url:</td><td>{pagerdutyurl}</td></tr>
+                                        <tr id="slackchannel_sumrow"><td class="summlabel">Slack Channel:</td><td>{slackchannel}</td></tr>
+                                        <tr id="discordchannel_sumrow"><td class="summlabel">Discord Channel:</td><td>{discordchannel}</td></tr>
+                                        <tr id="hipchatchannel_sumrow"><td class="summlabel">HipChat Channel:</td><td>{hipchatchannel}</td></tr>
+                                        <tr id="gitcommit_sumrow"><td class="summlabel">Git Commit:</td><td>{gitcommit}</td></tr>
+                                        <tr id="gitrepo_sumrow"><td class="summlabel">Git Repo:</td><td>{gitrepo}</td></tr>
+                                        <tr id="gittag_sumrow"><td class="summlabel">Git Tag:</td><td>{gittag}</td></tr>
+                                        <tr id="giturl_sumrow"><td class="summlabel">Git URL:</td><td>{giturl}</td></tr>
+                                    </table>
                                 </div>
-                            </body>
-                            </html>
+
+                                <div id="compdetail" style="margin-left: 50%;">
+                                    <table id="compitem" class="dev-table">
+                                        <tr id="builddate_sumrow"><td class="summlabel">Build Date:</td><td>{builddate}</td></tr>
+                                        <tr id="buildid_sumrow"><td class="summlabel">Build Id:</td><td>{buildid}</td></tr>
+                                        <tr id="buildurl_sumrow"><td class="summlabel">Build URL:</td><td>{buildurl}</td></tr>
+                                        <tr id="containerregistry_sumrow"><td class="summlabel">Container Registry:</td><td>{dockerrepo}</td></tr>
+                                        <tr id="containerdigest_sumrow"><td class="summlabel">Container Digest:</td><td>{dockersha}</td></tr>
+                                        <tr id="containertag_sumrow"><td class="summlabel">Container Tag:</td><td>{dockertag}</td></tr>
+                                        <tr id="helmchart_sumrow"><td class="summlabel">Helm Chart:</td><td>{chart}</td></tr>
+                                        <tr id="helmchartnamespace_sumrow"><td class="summlabel">Helm Chart Namespace:</td><td>{chartnamespace}</td></tr>
+                                        <tr id="helmchartrepo_sumrow"><td class="summlabel">Helm Chart Repo:</td><td>{chartrepo}</td></tr>
+                                        <tr id="helmchartrepourl_sumrow"><td class="summlabel">Helm Chart Repo Url:</td><td>{chartrepourl}</td></tr>
+                                        <tr id="helmchartversion_sumrow"><td class="summlabel">Helm Chart Version:</td><td>{chartversion}</td></tr>
+                                    </table>
+                                </div>
+                            </div>
+                            <br>
                         """
 
-                        html_string = f"""
-                            <html>
-                            <body>
-                                {comptable}
-                                <br>
-                                <div id='high'>
-                                    <h2>High Risk Packages</h2>
-                                    {high_table}
+                        comptable = comptable + comp
+
+                    cursor.close()
+                    rptdate = datetime.datetime.now().astimezone().strftime("%B %d, %Y at %I:%M %p %Z")
+                    cover_url = os.getenv("COVER_URL", "https://ortelius.io/images/sbom-cover.svg")
+
+                    cover_html = f"""
+                        <html>
+                        <head>
+                            <title>SBOM Report</title>
+                            <style>
+                                body {{
+                                    font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
+                                }}
+
+                                .coverpage {{
+                                    margin: 0;
+                                    padding: 0;
+                                    height: 890px;
+                                    width: 1157px;
+                                }}
+
+                                .rptdate {{
+                                    position: absolute;
+                                    top: 770px;
+                                    left: 72%;
+                                    font-size: 1.3em;
+                                    color: white;
+                                }}
+
+                                .objname {{
+                                    position: absolute;
+                                    top: 720px;
+                                    font-size: 2em;
+                                    left: 15px;
+                                    color: white;
+                                }}
+                            </style>
+                        </head>
+                        <body>
+                            <div>
+                                <div class="coverpage">
+                                    <img src="{cover_url}" />
+                                    <div class="objname">{objname}</div>
+                                    <p class="rptdate">{rptdate}</p>
                                 </div>
-                                <div id='medium'>
-                                    <h2>Medium Risk Packages</h2>
-                                    {medium_table}
-                                </div>
-                                <div id='low'>
-                                    <h2>Low Risk Packages</h2>
-                                    {low_table}
-                                </div>
-                                <div id='good'>
-                                    <h2>No Risk Packages</h2>
-                                    {good_table}
-                                </div>
-                            </body>
-                            </html>
-                            """
+                            </div>
+                        </body>
+                        </html>
+                    """
 
-                        options = {
-                            "page-size": "Letter",
-                            "margin-top": "0.5in",
-                            "margin-right": "0.5in",
-                            "margin-bottom": "0.5in",
-                            "margin-left": "0.5in",
-                            "encoding": "UTF-8",
-                            "orientation": "Landscape",
-                            "footer-right": "[page] of [topage]",
-                        }
+                    html_string = f"""
+                        <html>
+                        <body>
+                            {comptable}
+                            <br>
+                            <div id='high'>
+                                <h2>High Risk Packages</h2>
+                                {high_table}
+                            </div>
+                            <div id='medium'>
+                                <h2>Medium Risk Packages</h2>
+                                {medium_table}
+                            </div>
+                            <div id='low'>
+                                <h2>Low Risk Packages</h2>
+                                {low_table}
+                            </div>
+                            <div id='good'>
+                                <h2>No Risk Packages</h2>
+                                {good_table}
+                            </div>
+                        </body>
+                        </html>
+                        """
 
-                        with tempfile.TemporaryDirectory() as tmp:
-                            out_pdf = os.path.join(tmp, "sbom.pdf")
-                            cover = os.path.join(tmp, "cover.html")
+                    options = {
+                        "page-size": "Letter",
+                        "margin-top": "0.5in",
+                        "margin-right": "0.5in",
+                        "margin-bottom": "0.5in",
+                        "margin-left": "0.5in",
+                        "encoding": "UTF-8",
+                        "orientation": "Landscape",
+                        "footer-right": "[page] of [topage]",
+                    }
 
-                            with open(cover, "w") as cover_file:
-                                cover_file.write(cover_html)
+                    with tempfile.TemporaryDirectory() as tmp:
+                        out_pdf = os.path.join(tmp, "sbom.pdf")
+                        cover = os.path.join(tmp, "cover.html")
 
-                            pdfkit.from_string(html_string, out_pdf, options=options, css="export.css", cover=cover)
-                            print("done!")
+                        with open(cover, "w") as cover_file:
+                            cover_file.write(cover_html)
 
-                            with open(out_pdf, "rb") as fh:
-                                data = BytesIO(fh.read())
-                                headers = {"Content-Disposition": 'inline; filename="sbom.pdf"', "content-type": "application/pdf"}
-                                return StreamingResponse(data, media_type="application/pdf", headers=headers)
+                        pdfkit.from_string(html_string, out_pdf, options=options, css="export.css", cover=cover)
+                        print("done!")
+
+                        with open(out_pdf, "rb") as fh:
+                            data = BytesIO(fh.read())
+                            headers = {"Content-Disposition": 'inline; filename="sbom.pdf"', "content-type": "application/pdf"}
+                            return StreamingResponse(data, media_type="application/pdf", headers=headers)
 
                     return {"error": "File not found!"}
 
