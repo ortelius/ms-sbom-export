@@ -1,12 +1,12 @@
 {
-  "openapi": "3.0.2",
+  "openapi": "3.1.0",
   "info": {
-    "title": "ortelius-ms-sbom-export",
+    "title": "ms-sbom-export",
     "description": "RestAPI endpoint for retrieving SBOM data to a component",
     "contact": {
-      "name": "Ortelius Open Source Project",
-      "url": "https://github.com/ortelius/ortelius/issues",
-      "email": "support@ortelius.io"
+      "name": "DeployHub SBOM Export",
+      "url": "https://github.com/DeployHubProject/DeployHub-Pro/issues",
+      "email": "notify-support@deployhub.com"
     },
     "license": {
       "name": "Apache 2.0",
@@ -16,14 +16,16 @@
   },
   "servers": [
     {
-      "url": "http://localhost:5003",
+      "url": "http://localhost:5004/",
       "description": "Local Server"
     }
   ],
   "paths": {
     "/health": {
       "get": {
-        "tags": ["health"],
+        "tags": [
+          "health"
+        ],
         "summary": "Health",
         "description": "This health check end point used by Kubernetes",
         "operationId": "health_health_get",
@@ -41,40 +43,46 @@
         }
       }
     },
-    "/msapi/deppkg": {
+    "/msapi/sbom": {
       "get": {
-        "tags": ["deppkg"],
-        "summary": "Getcomppkgdeps",
-        "description": "This is the end point used to retrieve the component's SBOM (package dependencies)",
-        "operationId": "getCompPkgDeps_msapi_deppkg_get",
+        "tags": [
+          "sbom"
+        ],
+        "summary": "Export Sbom",
+        "description": "This is the end point used to create PDF of the Application/Component SBOM",
+        "operationId": "export_sbom_msapi_sbom_get",
         "parameters": [
           {
-            "required": false,
-            "schema": {
-              "title": "Compid",
-              "type": "integer"
-            },
             "name": "compid",
-            "in": "query"
-          },
-          {
+            "in": "query",
             "required": false,
             "schema": {
-              "title": "Appid",
-              "type": "integer"
-            },
-            "name": "appid",
-            "in": "query"
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Compid"
+            }
           },
           {
-            "required": true,
+            "name": "appid",
+            "in": "query",
+            "required": false,
             "schema": {
-              "title": "Deptype",
-              "pattern": "(?:license|cve)",
-              "type": "string"
-            },
-            "name": "deptype",
-            "in": "query"
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Appid"
+            }
           }
         ],
         "responses": {
@@ -82,9 +90,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DepPkgs"
-                }
+                "schema": {}
               }
             }
           },
@@ -104,104 +110,40 @@
   },
   "components": {
     "schemas": {
-      "DepPkg": {
-        "title": "DepPkg",
-        "required": [
-          "packagename",
-          "packageversion",
-          "pkgtype",
-          "name",
-          "url",
-          "summary",
-          "fullcompname",
-          "risklevel"
-        ],
-        "type": "object",
-        "properties": {
-          "packagename": {
-            "title": "Packagename",
-            "type": "string"
-          },
-          "packageversion": {
-            "title": "Packageversion",
-            "type": "string"
-          },
-          "pkgtype": {
-            "title": "Pkgtype",
-            "type": "string"
-          },
-          "name": {
-            "title": "Name",
-            "type": "string"
-          },
-          "url": {
-            "title": "Url",
-            "type": "string"
-          },
-          "summary": {
-            "title": "Summary",
-            "type": "string"
-          },
-          "fullcompname": {
-            "title": "Fullcompname",
-            "type": "string"
-          },
-          "risklevel": {
-            "title": "Risklevel",
-            "type": "string"
-          }
-        }
-      },
-      "DepPkgs": {
-        "title": "DepPkgs",
-        "required": ["data"],
-        "type": "object",
-        "properties": {
-          "data": {
-            "title": "Data",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DepPkg"
-            }
-          }
-        }
-      },
       "HTTPValidationError": {
-        "title": "HTTPValidationError",
-        "type": "object",
         "properties": {
           "detail": {
-            "title": "Detail",
-            "type": "array",
             "items": {
               "$ref": "#/components/schemas/ValidationError"
-            }
+            },
+            "type": "array",
+            "title": "Detail"
           }
-        }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
       },
       "StatusMsg": {
-        "title": "StatusMsg",
-        "required": ["status", "service_name"],
-        "type": "object",
         "properties": {
           "status": {
-            "title": "Status",
-            "type": "string"
+            "type": "string",
+            "title": "Status"
           },
           "service_name": {
-            "title": "Service Name",
-            "type": "string"
+            "type": "string",
+            "title": "Service Name"
           }
-        }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "service_name"
+        ],
+        "title": "StatusMsg"
       },
       "ValidationError": {
-        "title": "ValidationError",
-        "required": ["loc", "msg", "type"],
-        "type": "object",
         "properties": {
           "loc": {
-            "title": "Location",
-            "type": "array",
             "items": {
               "anyOf": [
                 {
@@ -211,17 +153,26 @@
                   "type": "integer"
                 }
               ]
-            }
+            },
+            "type": "array",
+            "title": "Location"
           },
           "msg": {
-            "title": "Message",
-            "type": "string"
+            "type": "string",
+            "title": "Message"
           },
           "type": {
-            "title": "Error Type",
-            "type": "string"
+            "type": "string",
+            "title": "Error Type"
           }
-        }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
       }
     }
   },
@@ -231,7 +182,7 @@
       "description": "health check end point"
     },
     {
-      "name": "deppkg",
+      "name": "sbom",
       "description": "Retrieve Package Dependencies end point"
     }
   ]
