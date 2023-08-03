@@ -336,6 +336,7 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None)
 
                         cursor.close()
                         rptdate = datetime.datetime.now().astimezone().strftime("%B %d, %Y at %I:%M %p %Z")
+                        cover_url = os.getenv("COVER_URL", "https://ortelius.io/images/sbom-cover.svg")
 
                         cover_html = f"""
                             <html>
@@ -373,7 +374,7 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None)
                             <body>
                                 <div>
                                     <div class="coverpage">
-                                        <img src="https://deployhub.com/downloads/sbom-cover.svg" />
+                                        <img src="{cover_url}" />
                                         <div class="objname">{objname}</div>
                                         <p class="rptdate">{rptdate}</p>
                                     </div>

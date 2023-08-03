@@ -5,6 +5,7 @@ WORKDIR /app
 
 ENV PIP_BREAK_SYSTEM_PACKAGES 1
 ENV PYTHONPATH=/usr/lib/python3.11/site-packages
+ENV COVER_URL https://ortelius.io/images/sbom-cover.svg
 
 RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories; \
     echo "http://dl-cdn.alpinelinux.org/alpine/edge/main" >> /etc/apk/repositories; \

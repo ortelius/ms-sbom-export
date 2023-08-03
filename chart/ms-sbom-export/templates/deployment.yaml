@@ -63,6 +63,8 @@ spec:
                 secretKeyRef:
                   name: pgcred
                   key: DBName
+            - name: COVER_URL
+              value: {{ .Values.cover_url | default "https://ortelius.io/images/sbom-cover.svg" }}
           ports:
             - name: http
               containerPort: 8080
