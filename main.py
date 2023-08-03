@@ -123,10 +123,16 @@ async def health(response: Response) -> StatusMsg:
 
 
 @app.get("/msapi/sbom", tags=["sbom"])
-async def export_sbom(compid: Optional[int] = None, appid: Optional[int] = None):
+async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None):
     """
     This is the end point used to create PDF of the Application/Component SBOM
     """
+
+    if compid is not None and (compid.startswith("cv") or compid.startswith("co")):
+        compid = compid[2:]
+
+    if appid is not None and (appid.startswith("av") or appid.startswith("ap")):
+        appid = appid[2:]
 
     try:
         # Retry logic for failed query
