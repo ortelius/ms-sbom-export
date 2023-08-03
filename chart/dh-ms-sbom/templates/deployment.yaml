@@ -16,25 +16,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "dh-ms-sbom.name" . }}
+  name: {{ include "ms-sbom-export.name" . }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: {{ include "dh-ms-sbom.name" . }}
+      app: {{ include "ms-sbom-export.name" . }}
       tier: backend
       track: stable
   template:
     metadata:
       labels:
-        app: {{ include "dh-ms-sbom.name" . }}
+        app: {{ include "ms-sbom-export.name" . }}
         tier: backend
         track: stable
     spec:
       nodeSelector:
         kubernetes.io/os: linux
       containers:
-        - name: {{ include "dh-ms-sbom.name" . }}
+        - name: {{ include "ms-sbom-export.name" . }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: Always
           env:

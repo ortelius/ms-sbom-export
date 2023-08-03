@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.2",
   "info": {
-    "title": "ortelius-dh-ms-sbom",
+    "title": "ortelius-ms-sbom-export",
     "description": "RestAPI endpoint for retrieving SBOM data to a component",
     "contact": {
       "name": "Ortelius Open Source Project",

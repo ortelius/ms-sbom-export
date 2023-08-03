@@ -233,6 +233,11 @@ pandas==2.0.3 \
     --hash=sha256:f167beed68918d62bffb6ec64f2e1d8a7d297a038f86d4aed056b9493fca407f \
     --hash=sha256:f3421a7afb1a43f7e38e82e844e2bca9a6d793d66c1a7f9f0ff39a795bbc5e02
     # via -r requirements.in
+pdfkit==1.0.0 \
+    --hash=sha256:992f821e1e18fc8a0e701ecae24b51a2d598296a180caee0a24c0af181da02a9 \
+    --hash=sha256:a7a4ca0d978e44fa8310c4909f087052430a6e8e0b1dd7ceef657f139789f96f \
+    --hash=sha256:cc122e5aed594198ff7aaa566f2950d2163763576ab891c161bb1f6c630f5a8e
+    # via -r requirements.in
 psycopg2-binary==2.9.6 \
     --hash=sha256:02c0f3757a4300cf379eb49f543fb7ac527fb00144d39246ee40e1df684ab514 \
     --hash=sha256:02c6e3cf3439e213e4ee930308dc122d6fb4d4bea9aef4a12535fbd605d1a2fe \

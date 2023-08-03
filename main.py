@@ -44,7 +44,7 @@ def is_blank(check_str):
 
 
 # Init Globals
-SERVICE_NAME = "dh-ms-sbom"
+SERVICE_NAME = "ms-sbom-export"
 DB_CONN_RETRY = 3
 
 tags_metadata = [
@@ -196,7 +196,7 @@ async def export_sbom(compid: Optional[int] = None, appid: Optional[int] = None)
                             rows = cursor.fetchall()
 
                             for row in rows:
-                                objname = row[0] + " Component"
+                                objname = "Component<br>" + row[0]
 
                             sqlstmt = """
                                 select distinct fulldomain(b.domainid, b.name), fulldomain(r.domainid, r.name) "repository", target "targetdirectory",
@@ -226,7 +226,7 @@ async def export_sbom(compid: Optional[int] = None, appid: Optional[int] = None)
                             cursor.execute("select name from dm.dm_application where id = %s", params)
                             rows = cursor.fetchall()
                             for row in rows:
-                                objname = row[0] + " Application"
+                                objname = "Application<br>" + row[0]
 
                             sqlstmt = """
                                 select distinct fulldomain(b.domainid, b.name), fulldomain(r.domainid, r.name) "repository", target "targetdirectory",
@@ -331,22 +331,54 @@ async def export_sbom(compid: Optional[int] = None, appid: Optional[int] = None)
                         cursor.close()
                         rptdate = datetime.datetime.now().astimezone().strftime("%B %d, %Y at %I:%M %p %Z")
 
-                        html_string = f"""
+                        cover_html = f"""
                             <html>
                             <head>
                                 <title>SBOM Report</title>
+                                <style>
+                                    body {{
+                                        font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
+                                    }}
+
+                                    .coverpage {{
+                                        margin: 0;
+                                        padding: 0;
+                                        height: 890px;
+                                        width: 1157px;
+                                    }}
+
+                                    .rptdate {{
+                                      position: absolute;
+                                      top: 770px;
+                                      left: 72%;
+                                      font-size: 1.3em;
+                                      color: white;
+                                    }}
+
+                                    .objname {{
+                                      position: absolute;
+                                      top: 720px;
+                                      font-size: 2em;
+                                      left: 15px;
+                                      color: white;
+                                    }}
+                                </style>
                             </head>
                             <body>
                                 <div>
-                                    <div class="logo">
-                                        <img alt="DeployHub" src="https://cdn.shortpixel.ai/spai/q_lossy+w_114+to_auto+ret_img/www.deployhub.com/wp-content/uploads/2018/04/justdog-small.png">
+                                    <div class="coverpage">
+                                        <img src="https://deployhub.com/downloads/sbom-cover.svg" />
+                                        <div class="objname">{objname}</div>
+                                        <p class="rptdate">{rptdate}</p>
                                     </div>
-                                <div class="title">
-                                    <p class="title-text"><i>{objname}</i></p>
-                                    <p class="title-text">Software Bill Of Materials Report</p>
-                                    <p class="generated">As Of {rptdate}</p>
                                 </div>
-                                </div>
+                            </body>
+                            </html>
+                        """
+
+                        html_string = f"""
+                            <html>
+                            <body>
                                 {comptable}
                                 <br>
                                 <div id='high'>
@@ -371,10 +403,10 @@ async def export_sbom(compid: Optional[int] = None, appid: Optional[int] = None)
 
                         options = {
                             "page-size": "Letter",
-                            "margin-top": "0.75in",
-                            "margin-right": "0.75in",
-                            "margin-bottom": "0.75in",
-                            "margin-left": "0.75in",
+                            "margin-top": "0.5in",
+                            "margin-right": "0.5in",
+                            "margin-bottom": "0.5in",
+                            "margin-left": "0.5in",
                             "encoding": "UTF-8",
                             "orientation": "Landscape",
                             "footer-right": "[page] of [topage]",
@@ -382,8 +414,12 @@ async def export_sbom(compid: Optional[int] = None, appid: Optional[int] = None)
 
                         with tempfile.TemporaryDirectory() as tmp:
                             out_pdf = os.path.join(tmp, "sbom.pdf")
+                            cover = os.path.join(tmp, "cover.html")
 
-                            pdfkit.from_string(html_string, out_pdf, options=options, css="export.css")
+                            with open(cover, "w") as cover_file:
+                                cover_file.write(cover_html)
+
+                            pdfkit.from_string(html_string, out_pdf, options=options, css="export.css", cover=cover)
                             print("done!")
 
                             with open(out_pdf, "rb") as fh:

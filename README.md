@@ -1,13 +1,13 @@
-# ortelius-dh-ms-sbom
+# ortelius-ms-sbom-export
 
-![Release](https://img.shields.io/github/v/release/ortelius/dh-ms-sbom?sort=semver)
-![license](https://img.shields.io/github/license/ortelius/dh-ms-sbom)
+![Release](https://img.shields.io/github/v/release/ortelius/ms-sbom-export?sort=semver)
+![license](https://img.shields.io/github/license/ortelius/ms-sbom-export)
 
-![Build](https://img.shields.io/github/actions/workflow/status/ortelius/dh-ms-sbom/build-push-chart.yml)
-[![MegaLinter](https://github.com/ortelius/dh-ms-sbom/workflows/MegaLinter/badge.svg?branch=main)](https://github.com/ortelius/dh-ms-sbom/actions?query=workflow%3AMegaLinter+branch%3Amain)
-![CodeQL](https://github.com/ortelius/dh-ms-sbom/workflows/CodeQL/badge.svg)
+![Build](https://img.shields.io/github/actions/workflow/status/ortelius/ms-sbom-export/build-push-chart.yml)
+[![MegaLinter](https://github.com/ortelius/ms-sbom-export/workflows/MegaLinter/badge.svg?branch=main)](https://github.com/ortelius/ms-sbom-export/actions?query=workflow%3AMegaLinter+branch%3Amain)
+![CodeQL](https://github.com/ortelius/ms-sbom-export/workflows/CodeQL/badge.svg)
 [![OpenSSF
--Scorecard](https://api.securityscorecards.dev/projects/github.com/ortelius/dh-ms-sbom/badge)](https://api.securityscorecards.dev/projects/github.com/ortelius/dh-ms-sbom)
+-Scorecard](https://api.securityscorecards.dev/projects/github.com/ortelius/ms-sbom-export/badge)](https://api.securityscorecards.dev/projects/github.com/ortelius/ms-sbom-export)
 
 
 

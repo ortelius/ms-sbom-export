@@ -275,24 +275,3 @@ body {
 .summlabel {
   white-space: nowrap;
 }
-
-.logo {
-  margin-top: 20px;
-  margin-left: 20px;
-}
-
-.title {
-  margin-top: 200px;
-  margin-bottom: 250px;
-}
-
-.title-text {
-  font-size: 4em;
-  font-weight: bold;
-  text-align: center;
-}
-
-.generated {
-  font-size: 2em;
-  text-align: center;
-}

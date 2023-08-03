@@ -16,10 +16,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "dh-ms-sbom.name" . }}
+  name: {{ include "ms-sbom-export.name" . }}
 spec:
   selector:
-    app: {{ include "dh-ms-sbom.name" . }}
+    app: {{ include "ms-sbom-export.name" . }}
   ports:
     - protocol: TCP
       port: 80
