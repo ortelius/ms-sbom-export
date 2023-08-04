@@ -358,15 +358,15 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None)
                                 .rptdate {{
                                     position: absolute;
                                     top: 770px;
-                                    left: 72%;
+                                    left: 70%;
                                     font-size: 1.3em;
                                     color: white;
                                 }}
 
                                 .objname {{
                                     position: absolute;
-                                    top: 720px;
-                                    font-size: 2em;
+                                    top: 740px;
+                                    font-size: 1.5em;
                                     left: 15px;
                                     color: white;
                                 }}
