@@ -387,6 +387,7 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None)
                     html_string = f"""
                         <html>
                         <body>
+                            <h3>Federated Component Evidence Details</h3>
                             {comptable}
                             <br>
                             <div id='high'>
