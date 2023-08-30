@@ -88,7 +88,7 @@ jobs:
       - name: Login to Quay
         if: ${{ github.repository_owner == 'ortelius' && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
         id: login
-        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a # v2.1.0
+        uses: docker/login-action@465a07811f14bebb1938fbed4728c6a1ff8901fc # v2.2.0
         with:
           registry: ${{ needs.setenv.outputs.registry }}
           username: ${{ secrets.QUAY_USERID }}
@@ -164,7 +164,7 @@ jobs:
           git config user.email "${{ needs.setenv.outputs.gh_handle }}@users.noreply.github.com"
 
       - name: Helm Chart Releaser
-        uses: ortelius/ms-cr-action@c0dd636892b3806508825577d8564d3475c1dbf9 # v1.0
+        uses: ortelius/ms-cr-action@d98a4163765db41dbc8159f3a31f30f77bbe23bd # v1.0
         with:
           gpg_keyring_base64: ${{ secrets.GPG_KEYRING_BASE64 }}
           gpg_passphrase: ${{ secrets.GPG_PASSPHRASE }}
@@ -199,7 +199,7 @@ jobs:
         uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
 
       - name: Generate SBOM
-        uses: anchore/sbom-action@07978da4bdb4faa726e52dfc6b1bed63d4b56479 # v0.13.3
+        uses: anchore/sbom-action@78fc58e266e87a38d4194b2137a3d4e9bcaf7ca1 # v0.14.3
         id: sbom
         with:
           format: cyclonedx-json
