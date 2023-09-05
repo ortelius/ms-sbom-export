@@ -40,7 +40,7 @@ jobs:
 
       - name: Checkout
         id: checkout
-        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+        uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v4.0.0
         with:
           fetch-depth: 1
 
@@ -83,7 +83,7 @@ jobs:
 
       - name: Checkout
         id: checkout
-        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+        uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v4.0.0
 
       - name: Login to Quay
         if: ${{ github.repository_owner == 'ortelius' && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
@@ -124,8 +124,12 @@ jobs:
         with:
           egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
 
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v4.0.0
+
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@559eb1224e654a86c844a795e6702a0742c60c72 # master
+        uses: aquasecurity/trivy-action@fbd16365eb88e12433951383f5e99bd901fc618f # master
         with:
           image-ref: ${{ needs.setenv.outputs.image_repo_tag }}
           format: "sarif"
@@ -153,23 +157,14 @@ jobs:
         with:
           egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
 
-      - name: Checkout
-        id: checkout
-        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
-
-      - name: Configure Git
-        id: git
-        run: |
-          git config user.name "${{ needs.setenv.outputs.gh_handle }}"
-          git config user.email "${{ needs.setenv.outputs.gh_handle }}@users.noreply.github.com"
-
       - name: Helm Chart Releaser
-        uses: ortelius/ms-cr-action@d98a4163765db41dbc8159f3a31f30f77bbe23bd # v1.2
+        uses: ortelius/ms-cr-action@52ab671927ec841d35c3fa7ecbcfb1569ee39391 # v1.2.14
         with:
           gpg_keyring_base64: ${{ secrets.GPG_KEYRING_BASE64 }}
           gpg_passphrase: ${{ secrets.GPG_PASSPHRASE }}
           gpg_key: ${{ secrets.GPG_KEY }}
           gh_token: ${{ secrets.HELM_INDEXER_TOKEN }}
+          gh_handle: ${{ needs.setenv.outputs.gh_handle }}
           chart: chart/${{ needs.setenv.outputs.compname }}
           chart_version: ${{ needs.setenv.outputs.chart_version }}
           image_repository: ${{ needs.setenv.outputs.image_repository }}
@@ -196,7 +191,7 @@ jobs:
 
       - name: Checkout
         id: checkout
-        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+        uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v4.0.0
 
       - name: Generate SBOM
         uses: anchore/sbom-action@78fc58e266e87a38d4194b2137a3d4e9bcaf7ca1 # v0.14.3
