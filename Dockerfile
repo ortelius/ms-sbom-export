@@ -11,7 +11,7 @@ RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repos
     echo "http://dl-cdn.alpinelinux.org/alpine/edge/main" >> /etc/apk/repositories; \
     apk update; \
     apk upgrade; \
-    apk --no-cache add libbz2=1.0.8-r6 py3-numpy=1.25.2-r0 py3-pandas=2.0.3-r0 python3=3.11.5-r0; \
+    apk --no-cache add libbz2=1.0.8-r6 py3-numpy=1.25.2-r0 py3-pandas=2.0.3-r0; \
     apk upgrade
 
 RUN python -m pip install --no-cache-dir -r requirements.txt; \
