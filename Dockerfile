@@ -10,12 +10,15 @@ ENV COVER_URL https://ortelius.io/images/sbom-cover.svg
 RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories; \
     echo "http://dl-cdn.alpinelinux.org/alpine/edge/main" >> /etc/apk/repositories; \
     apk update; \
-    apk upgrade; \
-    apk --no-cache add libbz2=1.0.8-r6 py3-numpy=1.25.2-r0 py3-pandas=2.0.3-r0; \
+    apk add --no-cache python3=3.11.6-r1; \
     apk upgrade
 
-RUN python -m pip install --no-cache-dir -r requirements.txt; \
-    cp "$(which uvicorn)" /app;
+RUN rm /usr/lib/python3.11/EXTERNALLY-MANAGED; \
+    python -m ensurepip --default-pip; \
+    pip install --no-cache-dir pip==23.3.1; \
+    pip install --no-cache-dir -r requirements.in --no-warn-script-location; \
+    cp "$(which uvicorn)" /app; \
+    pip uninstall -y pip wheel setuptools
 
 ENV DB_HOST localhost
 ENV DB_NAME postgres
