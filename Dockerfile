@@ -10,7 +10,7 @@ ENV COVER_URL https://ortelius.io/images/sbom-cover.svg
 RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories; \
     echo "http://dl-cdn.alpinelinux.org/alpine/edge/main" >> /etc/apk/repositories; \
     apk update; \
-    apk add --no-cache python3=3.11.6-r1; \
+    apk add --no-cache python3; \
     apk upgrade
 
 RUN rm /usr/lib/python3.11/EXTERNALLY-MANAGED; \
