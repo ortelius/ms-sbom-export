@@ -2,6 +2,17 @@ apiVersion: v1
 entries:
   ms-sbom-export:
   - apiVersion: v2
+    appVersion: 10.0.102
+    created: "2024-03-22T15:32:50.503223476Z"
+    description: Dependency Packages
+    digest: aff26a74de65e00f34a351014e1d6d3e4a864096d0874ed6e6492f4526a81656
+    icon: https://ortelius.github.io/ortelius-charts/logo.png
+    name: ms-sbom-export
+    type: application
+    urls:
+    - https://github.com/ortelius/ms-sbom-export/releases/download/ms-sbom-export-10.0.102/ms-sbom-export-10.0.102.tgz
+    version: 10.0.102
+  - apiVersion: v2
     appVersion: 10.0.100
     created: "2024-03-20T10:40:30.131812147Z"
     description: Dependency Packages
@@ -474,4 +485,4 @@ entries:
     urls:
     - https://github.com/ortelius/ms-sbom-export/releases/download/ms-sbom-export-10.0.0/ms-sbom-export-10.0.0.tgz
     version: 10.0.0
-generated: "2024-03-20T10:40:30.131479553Z"
+generated: "2024-03-22T15:32:50.502899774Z"
