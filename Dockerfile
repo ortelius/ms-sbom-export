@@ -1,4 +1,4 @@
-FROM surnet/alpine-python-wkhtmltopdf:3.12.1-0.12.6-small@sha256:3825f9218edfcb849b1b492ca5908df9655ee3e5db4bce785ace3801b6409996
+FROM surnet/alpine-python-wkhtmltopdf:3.12.2-0.12.6-small@sha256:a9e2cf2018a7bc62161f7f9c1ac3c2cdc6081d554f7bbeb9154c95b500c9b9db
 
 COPY . /app
 WORKDIR /app
