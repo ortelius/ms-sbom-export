@@ -304,9 +304,9 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None)
                                         <tr id="serviceownerphone_sumrow"><td class="summlabel">Service Owner Phone:</td><td>{serviceownerphone}</td></tr>
                                         <tr id="pagerdutybusinessserviceurl_sumrow"><td class="summlabel">PagerDuty Business Service Url:</td><td>{pagerdutybusinessurl}</td></tr>
                                         <tr id="pagerdutyserviceurl_sumrow"><td class="summlabel">PagerDuty Service Url:</td><td>{pagerdutyurl}</td></tr>
-                                        <tr id="slackchannel_sumrow"><td class="summlabel">Slack Channel:</td><td>{slackchannel}</td></tr>
-                                        <tr id="discordchannel_sumrow"><td class="summlabel">Discord Channel:</td><td>{discordchannel}</td></tr>
-                                        <tr id="hipchatchannel_sumrow"><td class="summlabel">HipChat Channel:</td><td>{hipchatchannel}</td></tr>
+                                        <tr id="slackchannel_sumrow"><td class="summlabel">Slack Channel:</td><td style="word-break: break-all;">{slackchannel}</td></tr>
+                                        <tr id="discordchannel_sumrow"><td class="summlabel">Discord Channel:</td><td style="word-break: break-all;">{discordchannel}</td></tr>
+                                        <tr id="hipchatchannel_sumrow"><td class="summlabel">HipChat Channel:</td><td style="word-break: break-all;">{hipchatchannel}</td></tr>
                                         <tr id="gitcommit_sumrow"><td class="summlabel">Git Commit:</td><td>{gitcommit}</td></tr>
                                         <tr id="gitrepo_sumrow"><td class="summlabel">Git Repo:</td><td>{gitrepo}</td></tr>
                                         <tr id="gittag_sumrow"><td class="summlabel">Git Tag:</td><td>{gittag}</td></tr>
