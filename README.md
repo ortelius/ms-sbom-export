@@ -1,7 +1,7 @@
 # ortelius-ms-sbom-export
 
 ![Release](https://img.shields.io/github/v/release/ortelius/ms-sbom-export?sort=semver)
-![license](https://img.shields.io/github/license/ortelius/ms-sbom-export)
+![license](https://img.shields.io/github/license/ortelius/.github)
 
 ![Build](https://img.shields.io/github/actions/workflow/status/ortelius/ms-sbom-export/build-push-chart.yml)
 [![MegaLinter](https://github.com/ortelius/ms-sbom-export/workflows/MegaLinter/badge.svg?branch=main)](https://github.com/ortelius/ms-sbom-export/actions?query=workflow%3AMegaLinter+branch%3Amain)
