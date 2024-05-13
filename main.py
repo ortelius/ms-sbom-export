@@ -142,12 +142,33 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None)
             try:
                 with engine.connect() as connection:
                     conn = connection.connection
+                    conn.set_session(autocommit=False)
                     cursor = conn.cursor()
+
+                    sqlstmt = """CREATE TEMPORARY TABLE IF NOT EXISTS dm_sbom
+                                (
+                                    compid integer NOT NULL,
+                                    packagename character varying(1024) NOT NULL,
+                                    packageversion character varying(256) NOT NULL,
+                                    name character varying(1024),
+                                    url character varying(1024),
+                                    summary character varying(8096),
+                                    purl character varying(1024),
+                                    pkgtype character varying(80)
+                                ) on commit delete rows
+                                """
+
+                    cursor.execute(sqlstmt)
 
                     sqlstmt = ""
                     objid = compid
                     if compid is not None:
                         sqlstmt = """
+                            SELECT b.packagename, b.packageversion, b.name, b.url, b.summary, c.name as compname, b.purl, b.pkgtype
+                            FROM dm_sbom b, dm.dm_component c
+                            where b.compid = :objid
+                            and b.compid = c.id
+                            UNION
                             SELECT b.packagename, b.packageversion, b.name, b.url, b.summary, c.name as compname, b.purl, b.pkgtype
                             FROM dm.dm_componentdeps b, dm.dm_component c
                             where b.compid = :objid and b.deptype = 'license'
@@ -155,6 +176,10 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None)
                             """
                     elif appid is not None:
                         sqlstmt = """
+                            select distinct b.packagename, b.packageversion, b.name, b.url, b.summary, c.name as compname, b.purl, b.pkgtype
+                            from dm.dm_applicationcomponent a, dm_sbom b, dm.dm_component c
+                            where appid = :objid and a.compid = b.compid and c.id = b.compid and b.deptype = 'license'
+                            union
                             select distinct b.packagename, b.packageversion, b.name, b.url, b.summary, c.name as compname, b.purl, b.pkgtype
                             from dm.dm_applicationcomponent a, dm.dm_componentdeps b, dm.dm_component c
                             where appid = :objid and a.compid = b.compid and c.id = b.compid and b.deptype = 'license'
@@ -336,6 +361,7 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None)
                         comptable = comptable + comp
 
                     cursor.close()
+                    conn.commit()
                     rptdate = datetime.datetime.now().astimezone().strftime("%B %d, %Y at %I:%M %p %Z")
                     cover_url = os.getenv("COVER_URL", "https://ortelius.io/images/sbom-cover.svg")
 
