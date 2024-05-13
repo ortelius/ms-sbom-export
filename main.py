@@ -178,7 +178,7 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None)
                         sqlstmt = """
                             select distinct b.packagename, b.packageversion, b.name, b.url, b.summary, c.name as compname, b.purl, b.pkgtype
                             from dm.dm_applicationcomponent a, dm_sbom b, dm.dm_component c
-                            where appid = :objid and a.compid = b.compid and c.id = b.compid and b.deptype = 'license'
+                            where appid = :objid and a.compid = b.compid and c.id = b.compid
                             union
                             select distinct b.packagename, b.packageversion, b.name, b.url, b.summary, c.name as compname, b.purl, b.pkgtype
                             from dm.dm_applicationcomponent a, dm.dm_componentdeps b, dm.dm_component c
