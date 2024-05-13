@@ -6,4 +6,4 @@ uvicorn==0.29.0
 requests==2.31.0
 numpy==1.26.4
 pandas==2.2.2
-pdfkit==1.0.0
+weasyprint==62.1

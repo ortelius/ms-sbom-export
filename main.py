@@ -26,7 +26,7 @@ from typing import Optional
 import requests
 
 import pandas as pd
-import pdfkit
+from weasyprint import HTML
 import uvicorn
 from fastapi import FastAPI, HTTPException, Response, status
 from fastapi.responses import StreamingResponse
@@ -449,14 +449,14 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None)
                         """
 
                     options = {
-                        "page-size": "Letter",
-                        "margin-top": "0.5in",
-                        "margin-right": "0.5in",
-                        "margin-bottom": "0.5in",
-                        "margin-left": "0.5in",
+                        "size": "Letter",
+                        "margin_top": "0.5in",
+                        "margin_right": "0.5in",
+                        "margin_bottom": "0.5in",
+                        "margin_left": "0.5in",
                         "encoding": "UTF-8",
-                        "orientation": "Landscape",
-                        "footer-right": "[page] of [topage]",
+                        "orientation": "landscape",
+                        "footer_right": "[page] of [topage]",
                     }
 
                     with tempfile.TemporaryDirectory() as tmp:
@@ -466,7 +466,8 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None)
                         with open(cover, "w") as cover_file:
                             cover_file.write(cover_html)
 
-                        pdfkit.from_string(html_string, out_pdf, options=options, css="export.css", cover=cover)
+                        # Generate PDF using WeasyPrint
+                        HTML(string=html_string).write_pdf(out_pdf, stylesheets=["export.css"], presentational_hints=True, cover=cover, **options)
                         print("done!")
 
                         with open(out_pdf, "rb") as fh:
