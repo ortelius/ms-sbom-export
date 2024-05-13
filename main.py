@@ -23,6 +23,7 @@ import tempfile
 from io import BytesIO
 from time import sleep
 from typing import Optional
+import requests
 
 import pandas as pd
 import pdfkit
@@ -142,8 +143,19 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None)
             try:
                 with engine.connect() as connection:
                     conn = connection.connection
-                    conn.set_session(autocommit=False)
                     cursor = conn.cursor()
+
+                    try:
+                        url = "http://localhost:8080/msapi/deppkg?compid=" + compid
+
+                        response = requests.get(url)
+                        response.raise_for_status()  # Raise an exception for 4xx and 5xx status codes
+                        data = response.json()  # Convert the JSON response to a Python dictionary
+                        print(data)  # Display the dictionary
+                    except requests.exceptions.HTTPError as err:
+                        print(f"HTTP error occurred: {err}")
+                    except requests.exceptions.RequestException as err:
+                        print(f"An error occurred: {err}")
 
                     sqlstmt = """CREATE TEMPORARY TABLE IF NOT EXISTS dm_sbom
                                 (
@@ -155,7 +167,7 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None)
                                     summary character varying(8096),
                                     purl character varying(1024),
                                     pkgtype character varying(80)
-                                ) on commit delete rows
+                                )
                                 """
 
                     cursor.execute(sqlstmt)

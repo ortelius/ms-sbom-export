@@ -9,7 +9,7 @@ WORKDIR /app
 ENV COVER_URL https://ortelius.io/images/sbom-cover.svg
 
 RUN dnf update -y; \
-    dnf install -y https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox-0.12.6-1.amazonlinux2.x86_64.rpm; \
+    dnf install -y https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-3/wkhtmltox-0.12.6.1-3.fedora37.x86_64.rpm; \
     curl -sL https://bootstrap.pypa.io/get-pip.py | python3; \
     dnf upgrade -y; \
     dnf clean all -y;
