@@ -13,100 +13,123 @@
 
 ![Discord](https://img.shields.io/discord/722468819091849316)
 
+> Version 10.0.0
 
-Dependency Package Data Microservice - Read
+RestAPI endpoint for retrieving SBOM data to a component
 
-This is a flask web application which returns a list of objects known as Component Dependencies when the
-endpoint `/msapi/deppkg` is accessed.
+## Path Table
 
-## Setup
+| Method | Path | Description |
+| --- | --- | --- |
+| GET | [/health](#gethealth) | Health |
+| GET | [/msapi/sbom](#getmsapisbom) | Export Sbom |
 
-- Clone the repository on your local computer
+## Reference Table
 
-### Start Postgres
+| Name | Path | Description |
+| --- | --- | --- |
+| HTTPValidationError | [#/components/schemas/HTTPValidationError](#componentsschemashttpvalidationerror) |  |
+| StatusMsg | [#/components/schemas/StatusMsg](#componentsschemasstatusmsg) |  |
+| ValidationError | [#/components/schemas/ValidationError](#componentsschemasvalidationerror) |  |
 
-The project requires a Postgres server to be running. This can be done by either installing Postgres directly on
-your machine and making available the following environmental variables for your python application:
+## Path Details
 
-| Environmental Variable | Description                                                               |
-|------------------------|---------------------------------------------------------------------------|
-| DB_NAME                | The name of the database you have created for the purpose of this project |
-| DB_HOST                | The hostname of the database server                                       |
-| DB_USER                | The username that would be used to access the database                    |
-| DB_PASSWORD            | The password to the database attached to the provided above user          |
-| DB_PORT                | The port that the postgres server run on. Usually 5432.                   |
+***
 
-You can make these environmental variables by creating a `.env` file (will be ignored by git) in the
-project root and filling with the required environmental variables like as shown below (these are
-injected into the docker container at runtime):
+### [GET]/health
 
-```shell
-DB_HOST=localhost
-DB_NAME=db
-DB_PASSWORD=password
-DB_USER=user
-DB_PORT=5433
+- Summary  
+Health
+
+- Description  
+This health check end point used by Kubernetes
+
+#### Responses
+
+- 200 Successful Response
+
+`application/json`
+
+```ts
+{
+  status?: string
+  service_name?: string
+}
 ```
 
-### To start the flask application
+***
 
-The flask application has been dockerized and can be utilized by following the steps below;
+### [GET]/msapi/sbom
 
-- Build the docker image using the following command
+- Summary  
+Export Sbom
 
-  ```shell
-  docker build -t comp-dep .
-  ```
+- Description  
+This is the end point used to create PDF of the Application/Component SBOM
 
-- Run the docker on local machine by executing the following command
+#### Parameters(Query)
 
-  ```shell
-  docker run -p 5000:5000 --env-file .env -d comp-dep
-  ```
-
-- You should be able to access the REST API endpoint by hitting `http://localhost:5004/msapi/deppkg` should return a response like this:
-
-```json
-[
-    {
-        "compid": 1,
-        "packagename": "Package 1",
-        "packageversion": "0.1",
-        "cve": "CVE 1",
-        "cve_url": "https://google.com/search?q=1",
-        "license": "License 1",
-        "license_url": "https://google.com/search?q=1"
-    },
-    {
-        "compid": 2,
-        "packagename": "Package 2",
-        "packageversion": "0.2",
-        "cve": "CVE 2",
-        "cve_url": "https://google.com/search?q=2",
-        "license": "License 2",
-        "license_url": "https://google.com/search?q=2"
-    },
-    {
-        "compid": 3,
-        "packagename": "Package 3",
-        "packageversion": "0.3",
-        "cve": "CVE 3",
-        "cve_url": "https://google.com/search?q=3",
-        "license": "License 3",
-        "license_url": "https://google.com/search?q=3"
-    },
-    {
-        "compid": 4,
-        "packagename": "Package 4",
-        "packageversion": "0.4",
-        "cve": "CVE 4",
-        "cve_url": "https://google.com/search?q=4",
-        "license": "License 4",
-        "license_url": "https://google.com/search?q=4"
-    }
-]
+```ts
+compid?: Partial(string) & Partial(null)
 ```
 
-## Fixed CVEs
+```ts
+appid?: Partial(string) & Partial(null)
+```
 
-- 2/27/23 - [CVE-2023-25139](https://www.openwall.com/lists/oss-security/2023/02/10/1)
+#### Responses
+
+- 200 Successful Response
+
+`application/json`
+
+```ts
+{}
+```
+
+- 422 Validation Error
+
+`application/json`
+
+```ts
+{
+  detail: {
+    loc?: Partial(string) & Partial(integer)[]
+    msg: string
+    type: string
+  }[]
+}
+```
+
+## References
+
+### #/components/schemas/HTTPValidationError
+
+```ts
+{
+  detail: {
+    loc?: Partial(string) & Partial(integer)[]
+    msg: string
+    type: string
+  }[]
+}
+```
+
+### #/components/schemas/StatusMsg
+
+```ts
+{
+  status?: string
+  service_name?: string
+}
+```
+
+### #/components/schemas/ValidationError
+
+```ts
+{
+  loc?: Partial(string) & Partial(integer)[]
+  msg: string
+  type: string
+}
+```
