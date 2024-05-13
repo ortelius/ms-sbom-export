@@ -23,16 +23,16 @@ import tempfile
 from io import BytesIO
 from time import sleep
 from typing import Optional
-import requests
 
 import pandas as pd
-from weasyprint import HTML
+import requests
 import uvicorn
 from fastapi import FastAPI, HTTPException, Response, status
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from sqlalchemy import create_engine, sql, text
 from sqlalchemy.exc import InterfaceError, OperationalError
+from weasyprint import HTML
 
 
 def make_clickable(url):
@@ -146,9 +146,9 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None)
                     cursor = conn.cursor()
 
                     try:
-                        url = "http://localhost:8080/msapi/deppkg?compid=" + compid
+                        url = "http://localhost:8080/msapi/deppkg?compid=" + str(compid)
 
-                        response = requests.get(url)
+                        response = requests.get(url, timeout=2)
                         response.raise_for_status()  # Raise an exception for 4xx and 5xx status codes
                         data = response.json()  # Convert the JSON response to a Python dictionary
                         print(data)  # Display the dictionary

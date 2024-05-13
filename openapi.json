@@ -1,1 +1,127 @@
-{"openapi":"3.1.0","info":{"title":"ms-sbom-export","description":"RestAPI endpoint for retrieving SBOM data to a component","contact":{"name":"DeployHub SBOM Export","url":"https://github.com/DeployHubProject/DeployHub-Pro/issues","email":"notify-support@deployhub.com"},"license":{"name":"Apache 2.0","url":"https://www.apache.org/licenses/LICENSE-2.0.html"},"version":"10.0.0"},"servers":[{"url":"http://localhost:5004","description":"Local Server"}],"paths":{"/health":{"get":{"tags":["health"],"summary":"Health","description":"This health check end point used by Kubernetes","operationId":"health_health_get","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/StatusMsg"}}}}}}},"/msapi/sbom":{"get":{"tags":["sbom"],"summary":"Export Sbom","description":"This is the end point used to create PDF of the Application/Component SBOM","operationId":"export_sbom_msapi_sbom_get","parameters":[{"name":"compid","in":"query","required":false,"schema":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Compid"}},{"name":"appid","in":"query","required":false,"schema":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Appid"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}}},"components":{"schemas":{"HTTPValidationError":{"properties":{"detail":{"items":{"$ref":"#/components/schemas/ValidationError"},"type":"array","title":"Detail"}},"type":"object","title":"HTTPValidationError"},"StatusMsg":{"properties":{"status":{"type":"string","title":"Status","default":""},"service_name":{"type":"string","title":"Service Name","default":""}},"type":"object","title":"StatusMsg"},"ValidationError":{"properties":{"loc":{"items":{"anyOf":[{"type":"string"},{"type":"integer"}]},"type":"array","title":"Location"},"msg":{"type":"string","title":"Message"},"type":{"type":"string","title":"Error Type"}},"type":"object","required":["loc","msg","type"],"title":"ValidationError"}}},"tags":[{"name":"health","description":"health check end point"},{"name":"sbom","description":"Retrieve Package Dependencies end point"}]}
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "ms-sbom-export",
+    "description": "RestAPI endpoint for retrieving SBOM data to a component",
+    "contact": {
+      "name": "DeployHub SBOM Export",
+      "url": "https://github.com/DeployHubProject/DeployHub-Pro/issues",
+      "email": "notify-support@deployhub.com"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "version": "10.0.0"
+  },
+  "servers": [
+    { "url": "http://localhost:5004", "description": "Local Server" }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": ["health"],
+        "summary": "Health",
+        "description": "This health check end point used by Kubernetes",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/StatusMsg" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/msapi/sbom": {
+      "get": {
+        "tags": ["sbom"],
+        "summary": "Export Sbom",
+        "description": "This is the end point used to create PDF of the Application/Component SBOM",
+        "operationId": "export_sbom_msapi_sbom_get",
+        "parameters": [
+          {
+            "name": "compid",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "Compid"
+            }
+          },
+          {
+            "name": "appid",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "Appid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": { "$ref": "#/components/schemas/ValidationError" },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "StatusMsg": {
+        "properties": {
+          "status": { "type": "string", "title": "Status", "default": "" },
+          "service_name": {
+            "type": "string",
+            "title": "Service Name",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "title": "StatusMsg"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": { "anyOf": [{ "type": "string" }, { "type": "integer" }] },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": { "type": "string", "title": "Message" },
+          "type": { "type": "string", "title": "Error Type" }
+        },
+        "type": "object",
+        "required": ["loc", "msg", "type"],
+        "title": "ValidationError"
+      }
+    }
+  },
+  "tags": [
+    { "name": "health", "description": "health check end point" },
+    { "name": "sbom", "description": "Retrieve Package Dependencies end point" }
+  ]
+}

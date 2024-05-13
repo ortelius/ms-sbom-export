@@ -10,6 +10,7 @@ ENV COVER_URL https://ortelius.io/images/sbom-cover.svg
 
 RUN dnf update -y; \
     curl -sL https://bootstrap.pypa.io/get-pip.py | python3; \
+    dnf install pango python3-cairo -y; \
     dnf upgrade -y; \
     dnf clean all -y;
 
