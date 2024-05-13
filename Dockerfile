@@ -1,24 +1,20 @@
-FROM surnet/alpine-python-wkhtmltopdf:3.12.2-0.12.6-small@sha256:a9e2cf2018a7bc62161f7f9c1ac3c2cdc6081d554f7bbeb9154c95b500c9b9db
+FROM public.ecr.aws/amazonlinux/amazonlinux:2023.4.20240429.0@sha256:bcb8bd282c38fa8c58369bd217d25b5f8fbd760c663660c8c630189b988f5d97
+
+# Set SHELL option to -o pipefail
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 COPY . /app
 WORKDIR /app
 
-ENV PIP_BREAK_SYSTEM_PACKAGES 1
-ENV PYTHONPATH=/usr/lib/python3.11/site-packages
 ENV COVER_URL https://ortelius.io/images/sbom-cover.svg
 
-RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories; \
-    echo "http://dl-cdn.alpinelinux.org/alpine/edge/main" >> /etc/apk/repositories; \
-    apk update; \
-    apk add --no-cache python3; \
-    apk upgrade
+RUN dnf update -y; \
+    dnf install -y https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox-0.12.6-1.amazonlinux2.x86_64.rpm; \
+    curl -sL https://bootstrap.pypa.io/get-pip.py | python3; \
+    dnf upgrade -y; \
+    dnf clean all -y;
 
-RUN rm /usr/lib/python3.11/EXTERNALLY-MANAGED; \
-    python -m ensurepip --default-pip; \
-    pip install --no-cache-dir pip==23.3.1; \
-    pip install --no-cache-dir -r requirements.in --no-warn-script-location; \
-    cp "$(which uvicorn)" /app; \
-    pip uninstall -y pip wheel setuptools
+RUN python3 -m pip install --no-cache-dir -r requirements.in --no-warn-script-location;
 
 ENV DB_HOST localhost
 ENV DB_NAME postgres
