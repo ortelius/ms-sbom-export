@@ -29,6 +29,7 @@ import requests
 import uvicorn
 from fastapi import FastAPI, HTTPException, Response, status
 from fastapi.responses import StreamingResponse
+from psycopg2.extras import execute_values
 from pydantic import BaseModel
 from sqlalchemy import create_engine, sql, text
 from sqlalchemy.exc import InterfaceError, OperationalError
@@ -90,6 +91,13 @@ if len(validateuser_url) == 0:
     host = socket.gethostbyaddr(validateuser_host)[0]
     validateuser_url = "http://" + host + ":" + str(os.getenv("MS_VALIDATE_USER_SERVICE_PORT", "80"))
 
+deppkg_url = os.getenv("SCEC_DEPPKG_URL", "")
+
+if len(deppkg_url) == 0:
+    deppkg_host = os.getenv("SCEC_DEPPKG_SERVICE_HOST", "127.0.0.1")
+    host = socket.gethostbyaddr(deppkg_host)[0]
+    deppkg_url = "http://" + host + ":" + str(os.getenv("SCEC_DEPPKG_SERVICE_PORT", "80")) + "/msapi/package"
+
 engine = create_engine("postgresql+psycopg2://" + db_user + ":" + db_pass + "@" + db_host + ":" + db_port + "/" + db_name, pool_pre_ping=True)
 
 
@@ -145,18 +153,6 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None)
                     conn = connection.connection
                     cursor = conn.cursor()
 
-                    try:
-                        url = "http://localhost:8080/msapi/deppkg?compid=" + str(compid)
-
-                        response = requests.get(url, timeout=2)
-                        response.raise_for_status()  # Raise an exception for 4xx and 5xx status codes
-                        data = response.json()  # Convert the JSON response to a Python dictionary
-                        print(data)  # Display the dictionary
-                    except requests.exceptions.HTTPError as err:
-                        print(f"HTTP error occurred: {err}")
-                    except requests.exceptions.RequestException as err:
-                        print(f"An error occurred: {err}")
-
                     sqlstmt = """CREATE TEMPORARY TABLE IF NOT EXISTS dm_sbom
                                 (
                                     compid integer NOT NULL,
@@ -171,6 +167,28 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None)
                                 """
 
                     cursor.execute(sqlstmt)
+
+                    if len(deppkg_url) > 0 and compid is not None:
+                        try:
+                            url = deppkg_url + "?deptype=license&compid=" + str(compid)
+
+                            response = requests.get(url, timeout=2)
+                            response.raise_for_status()
+                            data = response.json()
+                            rows = data.get("data", None)
+                            if rows is not None:
+                                insert_query = "INSERT INTO dm_sbom (compid, packagename, packageversion, name, url, summary, purl, pkgtype) VALUES %s"
+
+                                # Extract values from the dictionaries into a list of tuples
+                                values_list = [(row["key"], row["packagename"], row["packageversion"], row["name"], row["url"], row["summary"], "", row["pkgtype"]) for row in rows]
+
+                                # Execute the insert query with execute_values
+                                execute_values(cursor, insert_query, values_list)
+                                print(data)
+                        except requests.exceptions.HTTPError as err:
+                            print(f"HTTP error occurred: {err}")
+                        except requests.exceptions.RequestException as err:
+                            print(f"An error occurred: {err}")
 
                     sqlstmt = ""
                     objid = compid
@@ -200,6 +218,7 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None)
 
                     df_pkgs = pd.read_sql(sql.text(sqlstmt), connection, params={"objid": objid})
 
+                    critical_table = ""
                     high_table = ""
                     medium_table = ""
                     low_table = ""
@@ -220,15 +239,17 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None)
                         df.fillna("", inplace=True)
                         df.drop(["url", "summary", "purl_x", "pkgtype"], axis=1, inplace=True)
 
-                        df["risklevel"] = pd.Categorical(df["risklevel"], ["High", "Medium", "Low"])
+                        df["risklevel"] = pd.Categorical(df["risklevel"], ["Critical", "High", "Medium", "Low"])
                         df.sort_values(by=["risklevel", "packagename", "packageversion"], inplace=True)
                         df["risklevel"] = df["risklevel"].astype(str)
-                        df["risklevel"].replace("nan", "", inplace=True)
+                        df["risklevel"] = df["risklevel"].replace("nan", "")
                         df.columns = ["Package", "Version", "License", "Component", "CVE", "Purl", "Description", "Risk Level"]
                         df = df.reindex(columns=["Package", "Version", "License", "CVE", "Purl", "Description", "Component", "Risk Level"])
+                        df = df.drop("Purl", axis=1)
 
                         df["CVE"] = df["CVE"].apply(lambda x: make_clickable("https://osv.dev/vulnerability/" + x) if len(x) > 0 else x)
 
+                        critical_table = df.loc[df["Risk Level"] == "Critical"].drop("Risk Level", axis=1).to_html(classes=["critical-table"], index=False, escape=False, render_links=True)
                         high_table = df.loc[df["Risk Level"] == "High"].drop("Risk Level", axis=1).to_html(classes=["red-table"], index=False, escape=False, render_links=True)
                         medium_table = df.loc[df["Risk Level"] == "Medium"].drop("Risk Level", axis=1).to_html(classes=["orange-table"], index=False, escape=False, render_links=True)
                         low_table = df.loc[df["Risk Level"] == "Low"].drop("Risk Level", axis=1).to_html(classes=["gold-table"], index=False, escape=False, render_links=True)
@@ -336,34 +357,34 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None)
                             <div style="width: 100%;"><h3>{compname}</h3>
                                 <div id="compsum" style="width: 50%; float: left;">
                                     <table id="compowner_summ" class="dev-table">
-                                        <tr id="serviceowner_sumrow"><td class="summlabel">Service Owner:</td><td>{serviceowner}</td></tr>
-                                        <tr id="serviceowneremail_sumrow"><td class="summlabel">Service Owner Email:</td><td>{serviceowneremail}</td></tr>
-                                        <tr id="serviceownerphone_sumrow"><td class="summlabel">Service Owner Phone:</td><td>{serviceownerphone}</td></tr>
-                                        <tr id="pagerdutybusinessserviceurl_sumrow"><td class="summlabel">PagerDuty Business Service Url:</td><td>{pagerdutybusinessurl}</td></tr>
-                                        <tr id="pagerdutyserviceurl_sumrow"><td class="summlabel">PagerDuty Service Url:</td><td>{pagerdutyurl}</td></tr>
-                                        <tr id="slackchannel_sumrow"><td class="summlabel">Slack Channel:</td><td style="word-break: break-all;">{slackchannel}</td></tr>
-                                        <tr id="discordchannel_sumrow"><td class="summlabel">Discord Channel:</td><td style="word-break: break-all;">{discordchannel}</td></tr>
-                                        <tr id="hipchatchannel_sumrow"><td class="summlabel">HipChat Channel:</td><td style="word-break: break-all;">{hipchatchannel}</td></tr>
-                                        <tr id="gitcommit_sumrow"><td class="summlabel">Git Commit:</td><td>{gitcommit}</td></tr>
-                                        <tr id="gitrepo_sumrow"><td class="summlabel">Git Repo:</td><td>{gitrepo}</td></tr>
-                                        <tr id="gittag_sumrow"><td class="summlabel">Git Tag:</td><td>{gittag}</td></tr>
-                                        <tr id="giturl_sumrow"><td class="summlabel">Git URL:</td><td>{giturl}</td></tr>
+                                        <tr id="serviceowner_sumrow"><td class="summlabel">Service Owner:</td><td class="summval">{serviceowner}</td></tr>
+                                        <tr id="serviceowneremail_sumrow"><td class="summlabel">Service Owner Email:</td><td class="summval">{serviceowneremail}</td></tr>
+                                        <tr id="serviceownerphone_sumrow"><td class="summlabel">Service Owner Phone:</td><td class="summval">{serviceownerphone}</td></tr>
+                                        <tr id="pagerdutybusinessserviceurl_sumrow"><td class="summlabel">PagerDuty Business Service Url:</td><td class="summval">{pagerdutybusinessurl}</td></tr>
+                                        <tr id="pagerdutyserviceurl_sumrow"><td class="summlabel">PagerDuty Service Url:</td><td class="summval">{pagerdutyurl}</td></tr>
+                                        <tr id="slackchannel_sumrow"><td class="summlabel">Slack Channel:</td><td class="summval">{slackchannel}</td></tr>
+                                        <tr id="discordchannel_sumrow"><td class="summlabel">Discord Channel:</td><td class="summval">{discordchannel}</td></tr>
+                                        <tr id="hipchatchannel_sumrow"><td class="summlabel">HipChat Channel:</td><td class="summval">{hipchatchannel}</td></tr>
+                                        <tr id="gitcommit_sumrow"><td class="summlabel">Git Commit:</td><td class="summval">{gitcommit}</td></tr>
+                                        <tr id="gitrepo_sumrow"><td class="summlabel">Git Repo:</td><td class="summval">{gitrepo}</td></tr>
+                                        <tr id="gittag_sumrow"><td class="summlabel">Git Tag:</td><td class="summval">{gittag}</td></tr>
+                                        <tr id="giturl_sumrow"><td class="summlabel">Git URL:</td><td class="summval">{giturl}</td></tr>
                                     </table>
                                 </div>
 
                                 <div id="compdetail" style="margin-left: 50%;">
                                     <table id="compitem" class="dev-table">
-                                        <tr id="builddate_sumrow"><td class="summlabel">Build Date:</td><td>{builddate}</td></tr>
-                                        <tr id="buildid_sumrow"><td class="summlabel">Build Id:</td><td>{buildid}</td></tr>
-                                        <tr id="buildurl_sumrow"><td class="summlabel">Build URL:</td><td>{buildurl}</td></tr>
-                                        <tr id="containerregistry_sumrow"><td class="summlabel">Container Registry:</td><td>{dockerrepo}</td></tr>
-                                        <tr id="containerdigest_sumrow"><td class="summlabel">Container Digest:</td><td>{dockersha}</td></tr>
-                                        <tr id="containertag_sumrow"><td class="summlabel">Container Tag:</td><td>{dockertag}</td></tr>
-                                        <tr id="helmchart_sumrow"><td class="summlabel">Helm Chart:</td><td>{chart}</td></tr>
-                                        <tr id="helmchartnamespace_sumrow"><td class="summlabel">Helm Chart Namespace:</td><td>{chartnamespace}</td></tr>
-                                        <tr id="helmchartrepo_sumrow"><td class="summlabel">Helm Chart Repo:</td><td>{chartrepo}</td></tr>
-                                        <tr id="helmchartrepourl_sumrow"><td class="summlabel">Helm Chart Repo Url:</td><td>{chartrepourl}</td></tr>
-                                        <tr id="helmchartversion_sumrow"><td class="summlabel">Helm Chart Version:</td><td>{chartversion}</td></tr>
+                                        <tr id="builddate_sumrow"><td class="summlabel">Build Date:</td><td class="summval">{builddate}</td></tr>
+                                        <tr id="buildid_sumrow"><td class="summlabel">Build Id:</td><td class="summval">{buildid}</td></tr>
+                                        <tr id="buildurl_sumrow"><td class="summlabel">Build URL:</td><td class="summval">{buildurl}</td></tr>
+                                        <tr id="containerregistry_sumrow"><td class="summlabel">Container Registry:</td><td class="summval">{dockerrepo}</td></tr>
+                                        <tr id="containerdigest_sumrow"><td class="summlabel">Container Digest:</td><td class="summval">{dockersha}</td></tr>
+                                        <tr id="containertag_sumrow"><td class="summlabel">Container Tag:</td><td class="summval">{dockertag}</td></tr>
+                                        <tr id="helmchart_sumrow"><td class="summlabel">Helm Chart:</td><td class="summval">{chart}</td></tr>
+                                        <tr id="helmchartnamespace_sumrow"><td class="summlabel">Helm Chart Namespace:</td><td class="summval">{chartnamespace}</td></tr>
+                                        <tr id="helmchartrepo_sumrow"><td class="summlabel">Helm Chart Repo:</td><td class="summval">{chartrepo}</td></tr>
+                                        <tr id="helmchartrepourl_sumrow"><td class="summlabel">Helm Chart Repo Url:</td><td class="summval">{chartrepourl}</td></tr>
+                                        <tr id="helmchartversion_sumrow"><td class="summlabel">Helm Chart Version:</td><td class="summval">{chartversion}</td></tr>
                                     </table>
                                 </div>
                             </div>
@@ -375,7 +396,7 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None)
                     cursor.close()
                     conn.commit()
                     rptdate = datetime.datetime.now().astimezone().strftime("%B %d, %Y at %I:%M %p %Z")
-                    cover_url = os.getenv("COVER_URL", "https://ortelius.io/images/sbom-cover.svg")
+                    cover_url = os.getenv("COVER_URL", "https://www.deployhub.com/downloads/sbom-cover.svg")
 
                     cover_html = f"""
                         <html>
@@ -386,24 +407,35 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None)
                                     font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
                                 }}
 
+                                @page {{
+                                    size: Letter landscape;
+                                    margin: 0;
+                                    paddng: 0;
+                                    max-height: 8.5in;
+                                    max-width: 11in;
+                                }}
+
                                 .coverpage {{
                                     margin: 0;
                                     padding: 0;
-                                    height: 890px;
-                                    width: 1157px;
+                                    height: 100%;
+                                    width: 100%;
+                                    position: absolute;
+                                    top: 0;
+                                    left: 0;
                                 }}
 
                                 .rptdate {{
                                     position: absolute;
-                                    top: 770px;
-                                    left: 70%;
+                                    top: 700px;
+                                    left: 72%;
                                     font-size: 1.3em;
                                     color: white;
                                 }}
 
                                 .objname {{
                                     position: absolute;
-                                    top: 740px;
+                                    top: 700px;
                                     font-size: 1.5em;
                                     left: 15px;
                                     color: white;
@@ -428,6 +460,10 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None)
                             <h3>Federated Component Evidence Details</h3>
                             {comptable}
                             <br>
+                           <div id='critical'>
+                                <h2>Critical Risk Packages</h2>
+                                {critical_table}
+                            </div>
                             <div id='high'>
                                 <h2>High Risk Packages</h2>
                                 {high_table}
@@ -450,24 +486,34 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None)
 
                     options = {
                         "size": "Letter",
-                        "margin_top": "0.5in",
-                        "margin_right": "0.5in",
-                        "margin_bottom": "0.5in",
-                        "margin_left": "0.5in",
                         "encoding": "UTF-8",
-                        "orientation": "landscape",
                         "footer_right": "[page] of [topage]",
                     }
 
                     with tempfile.TemporaryDirectory() as tmp:
                         out_pdf = os.path.join(tmp, "sbom.pdf")
                         cover = os.path.join(tmp, "cover.html")
+                        body = os.path.join(tmp, "body.html")
 
                         with open(cover, "w") as cover_file:
                             cover_file.write(cover_html)
 
+                        with open(body, "w") as body_file:
+                            body_file.write(html_string)
+
+                        # Assemble cover page Document, should generate only 1 page within weasy_coverpage_doc.pages.
+                        weasy_coverpage_html = HTML(filename=cover)
+                        weasy_coverpage_doc = weasy_coverpage_html.render()
+
+                        weasy_html = HTML(filename=body)
+                        weasy_doc = weasy_html.render(stylesheets=["export.css"], presentational_hints=True, **options)
+
+                        # Insert first (will be only) page from weasy_coverpage_doc into pages in weasy_doc.
+                        weasy_doc.pages.insert(0, weasy_coverpage_doc.pages[0])
+                        weasy_doc.write_pdf(out_pdf)
+
                         # Generate PDF using WeasyPrint
-                        HTML(string=html_string).write_pdf(out_pdf, stylesheets=["export.css"], presentational_hints=True, cover=cover, **options)
+                        # HTML(string=html_string).write_pdf(out_pdf, stylesheets=["export.css"], presentational_hints=True, **options)
                         print("done!")
 
                         with open(out_pdf, "rb") as fh:

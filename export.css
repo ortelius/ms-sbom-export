@@ -1,3 +1,11 @@
+@page {
+  size: Letter landscape;
+  margin: .5in;
+  paddng: 0;
+  max-height: 8.5in;
+  max-width: 11in;
+}
+
 table.blue-table {
   border: 1px solid #1c6ea4;
   background-color: #eee;
@@ -17,7 +25,7 @@ table.blue-table th {
 }
 
 table.blue-table tbody td {
-  font-size: 13px;
+  font-size: 12px;
 }
 
 table.blue-table tr:nth-child(even) {
@@ -29,7 +37,7 @@ table.blue-table thead {
 }
 
 table.blue-table thead th {
-  font-size: 15px;
+  font-size: 12px;
   font-weight: bold;
   color: #fff;
   border-left: 2px solid #d0e4f5;
@@ -40,7 +48,7 @@ table.blue-table thead th:first-child {
 }
 
 table.blue-table tfoot {
-  font-size: 14px;
+  font-size: 12px;
   font-weight: bold;
   color: #fff;
   background: #d0e4f5;
@@ -48,7 +56,7 @@ table.blue-table tfoot {
 }
 
 table.blue-table tfoot td {
-  font-size: 14px;
+  font-size: 12px;
 }
 
 table.blue-table tfoot .links {
@@ -63,6 +71,73 @@ table.blue-table tfoot .links a {
   border-radius: 5px;
 }
 
+/* critical */
+table.critical-table {
+  border: 2px solid #f60a0a;
+  background-color: #eee7db;
+  width: 100%;
+  text-align: left;
+  border-collapse: collapse;
+}
+
+table.critical-table tbody td {
+  font-size: 12px;
+}
+
+table.critical-table thead {
+  background: #f60a0a;
+  border-bottom: 2px solid #444;
+}
+
+table.critical-table thead th {
+  font-size: 12px;
+  font-weight: bold;
+  color: #fff;
+  border-left: 2px solid #f60a0a;
+}
+
+table.critical-table thead th:first-child {
+  border-left: none;
+}
+
+table.critical-table tfoot {
+  font-size: 12px;
+  font-weight: bold;
+  color: #fff;
+  background: #f60a0a;
+  border-top: 2px solid #444;
+}
+
+table.critical-table tfoot td {
+  font-size: 12px;
+}
+
+table.critical-table tfoot .links {
+  text-align: right;
+}
+
+table.critical-table tfoot .links a {
+  display: inline-block;
+  background: #fff;
+  color: #f60a0a;
+  padding: 2px 8px;
+  border-radius: 5px;
+}
+
+table.critical-table td,
+table.critical-table th {
+  border: 1px solid #aaa;
+  padding: 3px 2px;
+}
+
+table.critical-table th {
+  text-align: center;
+}
+
+table.critical-table tr:nth-child(even) {
+  background: #f5c8bf;
+}
+
 /* red */
 table.red-table {
   border: 2px solid #a40808;
@@ -73,7 +148,7 @@ table.red-table {
 }
 
 table.red-table tbody td {
-  font-size: 13px;
+  font-size: 12px;
 }
 
 table.red-table thead {
@@ -82,7 +157,7 @@ table.red-table thead {
 }
 
 table.red-table thead th {
-  font-size: 15px;
+  font-size: 12px;
   font-weight: bold;
   color: #fff;
   border-left: 2px solid #a40808;
@@ -93,7 +168,7 @@ table.red-table thead th:first-child {
 }
 
 table.red-table tfoot {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: bold;
   color: #fff;
   background: #a40808;
@@ -101,7 +176,7 @@ table.red-table tfoot {
 }
 
 table.red-table tfoot td {
-  font-size: 14px;
+  font-size: 12px;
 }
 
 table.red-table tfoot .links {
@@ -150,7 +225,7 @@ table.orange-table th {
 }
 
 table.orange-table tbody td {
-  font-size: 13px;
+  font-size: 12px;
 }
 
 table.orange-table tr:nth-child(even) {
@@ -163,7 +238,7 @@ table.orange-table thead {
 }
 
 table.orange-table thead th {
-  font-size: 15px;
+  font-size: 12px;
   font-weight: bold;
   color: #fff;
   border-left: 2px solid #ffa952;
@@ -174,7 +249,7 @@ table.orange-table thead th:first-child {
 }
 
 table.orange-table tfoot {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: bold;
   color: #fff;
   background: #ffa952;
@@ -182,7 +257,7 @@ table.orange-table tfoot {
 }
 
 table.orange-table tfoot td {
-  font-size: 14px;
+  font-size: 12px;
 }
 
 table.orange-table tfoot .links {
@@ -217,7 +292,7 @@ table.gold-table th {
 }
 
 table.gold-table tbody td {
-  font-size: 13px;
+  font-size: 12px;
 }
 
 table.gold-table tr:nth-child(even) {
@@ -230,7 +305,7 @@ table.gold-table thead {
 }
 
 table.gold-table thead th {
-  font-size: 15px;
+  font-size: 12px;
   font-weight: bold;
   color: #fff;
   border-left: 2px solid #ffe79a;
@@ -241,7 +316,7 @@ table.gold-table thead th:first-child {
 }
 
 table.gold-table tfoot {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: bold;
   color: #fff;
   background: #ffe79a;
@@ -249,7 +324,7 @@ table.gold-table tfoot {
 }
 
 table.gold-table tfoot td {
-  font-size: 14px;
+  font-size: 12px;
 }
 
 table.gold-table tfoot .links {
@@ -274,4 +349,12 @@ body {
 
 .summlabel {
   white-space: nowrap;
+  vertical-align: top;
+  padding: 2px 8px;
+}
+
+.summval {
+  word-break: break-all;
+  vertical-align: top;
+  padding: 2px 8px;
 }
