@@ -8,6 +8,7 @@ WORKDIR /app
 
 ENV COVER_URL https://ortelius.io/images/sbom-cover.svg
 
+# hadolint ignore=DL3041
 RUN dnf update -y; \
     curl -sL https://bootstrap.pypa.io/get-pip.py | python3; \
     dnf install pango python3-cairo -y; \
