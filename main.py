@@ -168,8 +168,6 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None)
 
                     cursor.execute(sqlstmt)
 
-
-
                     sqlstmt = """CREATE TEMPORARY TABLE IF NOT EXISTS dm_vulns
                                 (
                                     packagename character varying(1024) NOT NULL,
