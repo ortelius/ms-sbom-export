@@ -185,7 +185,7 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None)
                         try:
                             url = deppkg_url + "?deptype=license&compid=" + str(compid)
 
-                            response = requests.get(url, timeout=2)
+                            response = requests.get(url, timeout=20)
                             response.raise_for_status()
                             data = response.json()
                             rows = data.get("data", None)
@@ -206,7 +206,7 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None)
                         try:
                             url = deppkg_url + "?&compid=" + str(compid)
 
-                            response = requests.get(url, timeout=2)
+                            response = requests.get(url, timeout=20)
                             response.raise_for_status()
                             data = response.json()
                             rows = data.get("data", None)
