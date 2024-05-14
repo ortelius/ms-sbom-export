@@ -214,10 +214,10 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None)
                                 insert_query = "INSERT INTO dm_vulns (packagename, packageversion, id, purl, summary, risklevel) VALUES %s"
 
                                 # Extract values from the dictionaries into a list of tuples
-                                values_list = [(row["packagename"], row["packageversion"], row["name"], row["url"], row["summary"], row["risklevel"]) for row in rows]
+                                vulns_list = [(row["packagename"], row["packageversion"], row["name"], row["url"], row["summary"], row["risklevel"]) for row in rows]
 
                                 # Execute the insert query with execute_values
-                                execute_values(cursor, insert_query, values_list)
+                                execute_values(cursor, insert_query, vulns_list)
                                 print(data)
                         except requests.exceptions.HTTPError as err:
                             print(f"HTTP error occurred: {err}")
