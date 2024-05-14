@@ -493,6 +493,371 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None)
 
                     html_string = f"""
                         <html>
+                        <head>
+                            <style>
+                                @page {{
+                                size: Letter landscape;
+                                margin: .5in;
+                                paddng: 0;
+                                max-height: 8.5in;
+                                max-width: 11in;
+                                }}
+
+                                table.blue-table {{
+                                border: 1px solid #1c6ea4;
+                                background-color: #eee;
+                                width: 100%;
+                                text-align: left;
+                                border-collapse: collapse;
+                                }}
+
+                                table.blue-table td,
+                                table.blue-table th {{
+                                border: 1px solid #aaa;
+                                padding: 3px 2px;
+                                }}
+
+                                table.blue-table th {{
+                                text-align: center;
+                                }}
+
+                                table.blue-table tbody td {{
+                                font-size: 12px;
+                                }}
+
+                                table.blue-table tr:nth-child(even) {{
+                                background: #d0e4f5;
+                                }}
+
+                                table.blue-table thead {{
+                                background: #1c6ea4;
+                                }}
+
+                                table.blue-table thead th {{
+                                font-size: 12px;
+                                font-weight: bold;
+                                color: #fff;
+                                border-left: 2px solid #d0e4f5;
+                                }}
+
+                                table.blue-table thead th:first-child {{
+                                border-left: none;
+                                }}
+
+                                table.blue-table tfoot {{
+                                font-size: 12px;
+                                font-weight: bold;
+                                color: #fff;
+                                background: #d0e4f5;
+                                border-top: 2px solid #444;
+                                }}
+
+                                table.blue-table tfoot td {{
+                                font-size: 12px;
+                                }}
+
+                                table.blue-table tfoot .links {{
+                                text-align: right;
+                                }}
+
+                                table.blue-table tfoot .links a {{
+                                display: inline-block;
+                                background: #1c6ea4;
+                                color: #fff;
+                                padding: 2px 8px;
+                                border-radius: 5px;
+                                }}
+
+                                /* critical */
+                                table.critical-table {{
+                                border: 2px solid #f60a0a;
+                                background-color: #eee7db;
+                                width: 100%;
+                                text-align: left;
+                                border-collapse: collapse;
+                                }}
+
+                                table.critical-table tbody td {{
+                                font-size: 12px;
+                                }}
+
+                                table.critical-table thead {{
+                                background: #f60a0a;
+                                border-bottom: 2px solid #444;
+                                }}
+
+                                table.critical-table thead th {{
+                                font-size: 12px;
+                                font-weight: bold;
+                                color: #fff;
+                                border-left: 2px solid #f60a0a;
+                                }}
+
+                                table.critical-table thead th:first-child {{
+                                border-left: none;
+                                }}
+
+                                table.critical-table tfoot {{
+                                font-size: 12px;
+                                font-weight: bold;
+                                color: #fff;
+                                background: #f60a0a;
+                                border-top: 2px solid #444;
+                                }}
+
+                                table.critical-table tfoot td {{
+                                font-size: 12px;
+                                }}
+
+                                table.critical-table tfoot .links {{
+                                text-align: right;
+                                }}
+
+                                table.critical-table tfoot .links a {{
+                                display: inline-block;
+                                background: #fff;
+                                color: #f60a0a;
+                                padding: 2px 8px;
+                                border-radius: 5px;
+                                }}
+
+                                table.critical-table td,
+                                table.critical-table th {{
+                                border: 1px solid #aaa;
+                                padding: 3px 2px;
+                                }}
+
+                                table.critical-table th {{
+                                text-align: center;
+                                }}
+
+                                table.critical-table tr:nth-child(even) {{
+                                background: #f5c8bf;
+                                }}
+
+                                /* red */
+                                table.red-table {{
+                                border: 2px solid #a40808;
+                                background-color: #eee7db;
+                                width: 100%;
+                                text-align: left;
+                                border-collapse: collapse;
+                                }}
+
+                                table.red-table tbody td {{
+                                font-size: 12px;
+                                }}
+
+                                table.red-table thead {{
+                                background: #a40808;
+                                border-bottom: 2px solid #444;
+                                }}
+
+                                table.red-table thead th {{
+                                font-size: 12px;
+                                font-weight: bold;
+                                color: #fff;
+                                border-left: 2px solid #a40808;
+                                }}
+
+                                table.red-table thead th:first-child {{
+                                border-left: none;
+                                }}
+
+                                table.red-table tfoot {{
+                                font-size: 12px;
+                                font-weight: bold;
+                                color: #fff;
+                                background: #a40808;
+                                border-top: 2px solid #444;
+                                }}
+
+                                table.red-table tfoot td {{
+                                font-size: 12px;
+                                }}
+
+                                table.red-table tfoot .links {{
+                                text-align: right;
+                                }}
+
+                                table.red-table tfoot .links a {{
+                                display: inline-block;
+                                background: #fff;
+                                color: #a40808;
+                                padding: 2px 8px;
+                                border-radius: 5px;
+                                }}
+
+                                table.red-table td,
+                                table.red-table th {{
+                                border: 1px solid #aaa;
+                                padding: 3px 2px;
+                                }}
+
+                                table.red-table th {{
+                                text-align: center;
+                                }}
+
+                                table.red-table tr:nth-child(even) {{
+                                background: #f5c8bf;
+                                }}
+
+                                /* orange */
+                                table.orange-table {{
+                                border: 2px solid #ffa952;
+                                background-color: #eee7db;
+                                width: 100%;
+                                text-align: left;
+                                border-collapse: collapse;
+                                }}
+
+                                table.orange-table td,
+                                table.orange-table th {{
+                                border: 1px solid #aaa;
+                                padding: 3px 2px;
+                                }}
+
+                                table.orange-table th {{
+                                text-align: center;
+                                }}
+
+                                table.orange-table tbody td {{
+                                font-size: 12px;
+                                }}
+
+                                table.orange-table tr:nth-child(even) {{
+                                background: #f5c8bf;
+                                }}
+
+                                table.orange-table thead {{
+                                background: #ffa952;
+                                border-bottom: 2px solid #444;
+                                }}
+
+                                table.orange-table thead th {{
+                                font-size: 12px;
+                                font-weight: bold;
+                                color: #fff;
+                                border-left: 2px solid #ffa952;
+                                }}
+
+                                table.orange-table thead th:first-child {{
+                                border-left: none;
+                                }}
+
+                                table.orange-table tfoot {{
+                                font-size: 12px;
+                                font-weight: bold;
+                                color: #fff;
+                                background: #ffa952;
+                                border-top: 2px solid #444;
+                                }}
+
+                                table.orange-table tfoot td {{
+                                font-size: 12px;
+                                }}
+
+                                table.orange-table tfoot .links {{
+                                text-align: right;
+                                }}
+
+                                table.orange-table tfoot .links a {{
+                                display: inline-block;
+                                background: #fff;
+                                color: #ffa952;
+                                padding: 2px 8px;
+                                border-radius: 5px;
+                                }}
+
+                                /* golden */
+                                table.gold-table {{
+                                border: 2px solid #ffe79a;
+                                background-color: #eee7db;
+                                width: 100%;
+                                text-align: left;
+                                border-collapse: collapse;
+                                }}
+
+                                table.gold-table td,
+                                table.gold-table th {{
+                                border: 1px solid #aaa;
+                                padding: 3px 2px;
+                                }}
+
+                                table.gold-table th {{
+                                text-align: center;
+                                }}
+
+                                table.gold-table tbody td {{
+                                font-size: 12px;
+                                }}
+
+                                table.gold-table tr:nth-child(even) {{
+                                background: #f5c8bf;
+                                }}
+
+                                table.gold-table thead {{
+                                background: #ffe79a;
+                                border-bottom: 2px solid #444;
+                                }}
+
+                                table.gold-table thead th {{
+                                font-size: 12px;
+                                font-weight: bold;
+                                color: #fff;
+                                border-left: 2px solid #ffe79a;
+                                }}
+
+                                table.gold-table thead th:first-child {{
+                                border-left: none;
+                                }}
+
+                                table.gold-table tfoot {{
+                                font-size: 12px;
+                                font-weight: bold;
+                                color: #fff;
+                                background: #ffe79a;
+                                border-top: 2px solid #444;
+                                }}
+
+                                table.gold-table tfoot td {{
+                                font-size: 12px;
+                                }}
+
+                                table.gold-table tfoot .links {{
+                                text-align: right;
+                                }}
+
+                                table.gold-table tfoot .links a {{
+                                display: inline-block;
+                                background: #fff;
+                                color: #ffe79a;
+                                padding: 2px 8px;
+                                border-radius: 5px;
+                                }}
+
+                                body {{
+                                font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
+                                font-size: 12px;
+                                }}
+
+                                .dev-table {{
+                                text-align: left;
+                                }}
+
+                                .summlabel {{
+                                white-space: nowrap;
+                                vertical-align: top;
+                                padding: 2px 8px;
+                                }}
+
+                                .summval {{
+                                word-break: break-all;
+                                vertical-align: top;
+                                padding: 2px 8px;
+                                }}
+                            </style>
+                        </head>
                         <body>
                             <h3>Federated Component Evidence Details</h3>
                             {comptable}
@@ -521,12 +886,6 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None)
                         </html>
                         """
 
-                    options = {
-                        "size": "Letter",
-                        "encoding": "UTF-8",
-                        "footer_right": "[page] of [topage]",
-                    }
-
                     with tempfile.TemporaryDirectory() as tmp:
                         out_pdf = os.path.join(tmp, "sbom.pdf")
                         cover = os.path.join(tmp, "cover.html")
@@ -543,7 +902,7 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None)
                         weasy_coverpage_doc = weasy_coverpage_html.render()
 
                         weasy_html = HTML(filename=body)
-                        weasy_doc = weasy_html.render(stylesheets=["export.css"], presentational_hints=True, **options)
+                        weasy_doc = weasy_html.render()
 
                         # Insert first (will be only) page from weasy_coverpage_doc into pages in weasy_doc.
                         weasy_doc.pages.insert(0, weasy_coverpage_doc.pages[0])
