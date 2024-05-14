@@ -168,6 +168,21 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None)
 
                     cursor.execute(sqlstmt)
 
+
+
+                    sqlstmt = """CREATE TEMPORARY TABLE IF NOT EXISTS dm_vulns
+                                (
+                                    packagename character varying(1024) NOT NULL,
+                                    packageversion character varying(256) NOT NULL,
+                                    id character varying(80) NOT NULL,
+                                    purl character varying(1024),
+                                    summary character varying(8096),
+                                    risklevel character varying(256)
+                                )
+                                """
+
+                    cursor.execute(sqlstmt)
+
                     if len(deppkg_url) > 0 and compid is not None:
                         try:
                             url = deppkg_url + "?deptype=license&compid=" + str(compid)
@@ -181,6 +196,27 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None)
 
                                 # Extract values from the dictionaries into a list of tuples
                                 values_list = [(row["key"], row["packagename"], row["packageversion"], row["name"], row["url"], row["summary"], "", row["pkgtype"]) for row in rows]
+
+                                # Execute the insert query with execute_values
+                                execute_values(cursor, insert_query, values_list)
+                                print(data)
+                        except requests.exceptions.HTTPError as err:
+                            print(f"HTTP error occurred: {err}")
+                        except requests.exceptions.RequestException as err:
+                            print(f"An error occurred: {err}")
+
+                        try:
+                            url = deppkg_url + "?&compid=" + str(compid)
+
+                            response = requests.get(url, timeout=2)
+                            response.raise_for_status()
+                            data = response.json()
+                            rows = data.get("data", None)
+                            if rows is not None:
+                                insert_query = "INSERT INTO dm_vulns (packagename, packageversion, id, purl, summary, risklevel) VALUES %s"
+
+                                # Extract values from the dictionaries into a list of tuples
+                                values_list = [(row["packagename"], row["packageversion"], row["name"], row["url"], row["summary"], row["risklevel"]) for row in rows]
 
                                 # Execute the insert query with execute_values
                                 execute_values(cursor, insert_query, values_list)
@@ -226,6 +262,9 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None)
 
                     if len(df_pkgs.index) > 0:
                         sqlstmt = """
+                            select distinct id, packagename, packageversion, purl, summary as cve_summary, risklevel from dm_vulns
+                            where (packagename || '@' || packageversion) = ANY(:pkglist) or purl = ANY(:purllist)
+                            union
                             select distinct id, packagename, packageversion, purl, summary as cve_summary, risklevel from dm.dm_vulns
                             where (packagename || '@' || packageversion) = ANY(:pkglist) or purl = ANY(:purllist)
                             """
