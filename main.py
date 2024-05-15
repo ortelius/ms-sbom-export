@@ -182,9 +182,9 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None)
                     cursor.execute(sqlstmt)
 
                     if appid is not None:
-                        params = (str(appid),)
+                        single_param = (str(appid),)
 
-                        cursor.execute("select distinct compid from dm.dm_applicationcomponent a, dm.dm_component b where appid = %s and a.compid = b.id and b.status = 'N'", params)
+                        cursor.execute("select distinct compid from dm.dm_applicationcomponent a, dm.dm_component b where appid = %s and a.compid = b.id and b.status = 'N'", single_param)
                         rows = cursor.fetchall()
                         complist = []
                         for row in rows:
@@ -313,15 +313,12 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None)
                         low_table = df.loc[df["Risk Level"] == "Low"].drop("Risk Level", axis=1).to_html(classes=["gold-table"], index=False, escape=False, render_links=True)
                         good_table = df.loc[df["Risk Level"] == ""].drop("Risk Level", axis=1).to_html(classes=["blue-table"], index=False, escape=False, render_links=True)
 
-                    params = tuple(
-                        str(),
-                    )
+                    params = tuple(str(),str(),)
                     objname = ""
 
                     if compid is not None:
-                        params = (str(compid),)
-
-                        cursor.execute("select name from dm.dm_component where id = %s", params)
+                        single_param = (str(compid),)
+                        cursor.execute("select name from dm.dm_component where id = %s", single_param)
                         rows = cursor.fetchall()
 
                         for row in rows:
@@ -350,9 +347,8 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None)
                             str(compid),
                         )
                     else:
-                        params = (str(appid),)
-
-                        cursor.execute("select name from dm.dm_application where id = %s", params)
+                        single_param = (str(appid),)
+                        cursor.execute("select name from dm.dm_application where id = %s", single_param)
                         rows = cursor.fetchall()
                         for row in rows:
                             objname = "Application<br>" + row[0]
