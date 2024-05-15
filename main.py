@@ -181,16 +181,15 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None)
 
                     cursor.execute(sqlstmt)
 
+                    complist = []
                     if appid is not None:
                         single_param = (str(appid),)
 
                         cursor.execute("select distinct compid from dm.dm_applicationcomponent a, dm.dm_component b where appid = %s and a.compid = b.id and b.status = 'N'", single_param)
                         rows = cursor.fetchall()
-                        complist = []
+
                         for row in rows:
-                            complist.append(row[0])
-                        appid = ",".join(complist)
-                        cursor.close()
+                            complist.append(str(row[0]))
 
                     if len(deppkg_url) > 0 and (compid is not None or appid is not None):
                         try:
@@ -199,7 +198,7 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None)
                             if compid is not None:
                                 url = url + "?deptype=license&compid=" + str(compid)
                             else:
-                                url = url + "?deptype=license&appid=" + str(appid)
+                                url = url + "?deptype=license&appid=" + ",".join(complist)
 
                             response = requests.get(url, timeout=20)
                             response.raise_for_status()
@@ -225,7 +224,7 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None)
                             if compid is not None:
                                 url = url + "?compid=" + str(compid)
                             else:
-                                url = url + "?appid=" + str(appid)
+                                url = url + "?appid=" + ",".join(complist)
 
                             response = requests.get(url, timeout=20)
                             response.raise_for_status()
