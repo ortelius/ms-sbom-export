@@ -15,7 +15,7 @@ RUN dnf update -y; \
     dnf upgrade -y; \
     dnf clean all -y;
 
-RUN python3 -m pip install --no-cache-dir -r requirements.in --no-warn-script-location;
+RUN python3 -m pip install --no-cache-dir -r requirements.txt --no-warn-script-location;
 
 ENV DB_HOST localhost
 ENV DB_NAME postgres
