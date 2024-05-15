@@ -9,13 +9,11 @@ WORKDIR /app
 ENV COVER_URL https://ortelius.io/images/sbom-cover.svg
 
 # hadolint ignore=DL3041
-RUN dnf update -y; \
-    curl -sL https://bootstrap.pypa.io/get-pip.py | python3; \
-    dnf install pango python3-cairo -y; \
+RUN dnf install -y python3.11 pango python3-cairo; \
+    curl -sL https://bootstrap.pypa.io/get-pip.py | python3.11; \
+    python3.11 -m pip install --no-cache-dir -r requirements.txt --no-warn-script-location; \
     dnf upgrade -y; \
-    dnf clean all -y;
-
-RUN python3 -m pip install --no-cache-dir -r requirements.txt --no-warn-script-location;
+    dnf clean all;
 
 ENV DB_HOST localhost
 ENV DB_NAME postgres
