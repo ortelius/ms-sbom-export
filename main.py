@@ -313,7 +313,10 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None)
                         low_table = df.loc[df["Risk Level"] == "Low"].drop("Risk Level", axis=1).to_html(classes=["gold-table"], index=False, escape=False, render_links=True)
                         good_table = df.loc[df["Risk Level"] == ""].drop("Risk Level", axis=1).to_html(classes=["blue-table"], index=False, escape=False, render_links=True)
 
-                    params = tuple(str(),str(),)
+                    params = (
+                        str(),
+                        str(),
+                    )
                     objname = ""
 
                     if compid is not None:
