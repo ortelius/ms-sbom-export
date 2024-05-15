@@ -1,17 +1,13 @@
 FROM public.ecr.aws/amazonlinux/amazonlinux:2023.4.20240513.0@sha256:f4c096ddea744b7e453acab52e4c54028b7f1563aac6f14870fbb27325617d9c
 
-# Set SHELL option to -o pipefail
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-
 COPY . /app
 WORKDIR /app
 
 ENV COVER_URL https://ortelius.io/images/sbom-cover.svg
 
 # hadolint ignore=DL3041
-RUN dnf install -y python3.11 pango python3-cairo; \
-    curl -sL https://bootstrap.pypa.io/get-pip.py | python3.11; \
-    python3.11 -m pip install --no-cache-dir -r requirements.txt --no-warn-script-location; \
+RUN dnf install -y python3.11 python3.11-pip pango python3-cairo; \
+    pip3.11 install --no-cache-dir -r requirements.txt --no-warn-script-location; \
     dnf upgrade -y; \
     dnf clean all;
 
