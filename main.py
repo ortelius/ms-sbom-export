@@ -181,9 +181,25 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None)
 
                     cursor.execute(sqlstmt)
 
-                    if len(deppkg_url) > 0 and compid is not None:
+                    if appid is not None:
+                        params = (str(appid),)
+
+                        cursor.execute("select distinct compid from dm.dm_applicationcomponent a, dm.dm_component b where appid = %s and a.compid = b.id and b.status = 'N'", params)
+                        rows = cursor.fetchall()
+                        complist = []
+                        for row in rows:
+                            complist.append(row[0])
+                        appid = ",".join(complist)
+                        cursor.close()
+
+                    if len(deppkg_url) > 0 and (compid is not None or appid is not None):
                         try:
-                            url = deppkg_url + "?deptype=license&compid=" + str(compid)
+                            url = deppkg_url
+
+                            if compid is not None:
+                                url = url + "?deptype=license&compid=" + str(compid)
+                            else:
+                                url = url + "?deptype=license&appid=" + str(appid)
 
                             response = requests.get(url, timeout=20)
                             response.raise_for_status()
@@ -204,7 +220,12 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None)
                             print(f"An error occurred: {err}")
 
                         try:
-                            url = deppkg_url + "?&compid=" + str(compid)
+                            url = deppkg_url
+
+                            if compid is not None:
+                                url = url + "?compid=" + str(compid)
+                            else:
+                                url = url + "?appid=" + str(appid)
 
                             response = requests.get(url, timeout=20)
                             response.raise_for_status()
@@ -292,7 +313,9 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None)
                         low_table = df.loc[df["Risk Level"] == "Low"].drop("Risk Level", axis=1).to_html(classes=["gold-table"], index=False, escape=False, render_links=True)
                         good_table = df.loc[df["Risk Level"] == ""].drop("Risk Level", axis=1).to_html(classes=["blue-table"], index=False, escape=False, render_links=True)
 
-                    params = tuple(str())
+                    params = tuple(
+                        str(),
+                    )
                     objname = ""
 
                     if compid is not None:
