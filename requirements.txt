@@ -278,9 +278,7 @@ exceptiongroup==1.2.1 \
 fastapi==0.111.0 \
     --hash=sha256:97ecbf994be0bcbdadedf88c3150252bed7b2087075ac99735403b1b76cc8fc0 \
     --hash=sha256:b9db9dd147c91cb8b769f7183535773d8741dd46f9dc6676cd82eab510228cd7
-    # via
-    #   -r requirements.in
-    #   fastapi-cli
+    # via -r requirements.in
 fastapi-cli==0.0.4 \
     --hash=sha256:a2552f3a7ae64058cdbb530be6fa6dbfc975dc165e4fa66d224c3d396e25e809 \
     --hash=sha256:e2e9ffaffc1f7767f488d6da34b6f5a377751c996f397902eb6abb99a67bde32
@@ -328,9 +326,7 @@ fonttools[woff]==4.52.4 \
     --hash=sha256:e176249292eccd89f81d39f514f2b5e8c75dfc9cef8653bdc3021d06697e9eff \
     --hash=sha256:ebb183ed8b789cece0bd6363121913fb6da4034af89a2fa5408e42a1592889a8 \
     --hash=sha256:fb8cd6559f0ae3a8f5e146f80ab2a90ad0325a759be8d48ee82758a0b89fa0aa
-    # via
-    #   fonttools
-    #   weasyprint
+    # via weasyprint
 greenlet==3.0.3 \
     --hash=sha256:01bc7ea167cf943b4c802068e178bbf70ae2e8c080467070d01bfa02f337ee67 \
     --hash=sha256:0448abc479fab28b00cb472d278828b3ccca164531daab4e970a0458786055d6 \
@@ -1159,7 +1155,6 @@ uvicorn[standard]==0.29.0 \
     # via
     #   -r requirements.in
     #   fastapi
-    #   fastapi-cli
 uvloop==0.19.0 \
     --hash=sha256:0246f4fd1bf2bf702e06b0d45ee91677ee5c31242f39aab4ea6fe0c51aedd0fd \
     --hash=sha256:02506dc23a5d90e04d4f65c7791e65cf44bd91b37f24cfc3ef6cf2aff05dc7ec \
