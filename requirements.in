@@ -3,7 +3,7 @@ psycopg2_binary==2.9.9
 pydantic==2.7.2
 SQLAlchemy==2.0.30
 uvicorn==0.30.0
-requests==2.32.2
+requests==2.32.3
 numpy==1.26.4
 pandas==2.2.2
 weasyprint==62.1
