@@ -1270,9 +1270,9 @@ watchfiles==0.22.0 \
     --hash=sha256:f7e1f9c5d1160d03b93fc4b68a0aeb82fe25563e12fbcdc8507f8434ab6f823c \
     --hash=sha256:fe82d13461418ca5e5a808a9e40f79c1879351fcaeddbede094028e74d836e86
     # via uvicorn
-weasyprint==62.1 \
-    --hash=sha256:654d4c266336cbf9acc4da118c7778ef5839717e6055d5b8f995cf50be200c46 \
-    --hash=sha256:bf3c1a9ac4194271a7cf117229c093744105b50ac2fa64c0a6e44e68ae742992
+weasyprint==62.2 \
+    --hash=sha256:6fd84e9f55ac239c5657845eae117fd43916c3c5986fe98f69ea13fdab8ec9ad \
+    --hash=sha256:a08ac400e11919d996d76becaa33160d7c1ac55ba160628c42ce7586574c1a51
     # via -r requirements.in
 webencodings==0.5.1 \
     --hash=sha256:a0af1213f3c2226497a97e2b3aa01a7e4bee4f403f95be16fc9acd2947514a78 \
