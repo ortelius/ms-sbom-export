@@ -278,9 +278,7 @@ exceptiongroup==1.2.1 \
 fastapi==0.111.0 \
     --hash=sha256:97ecbf994be0bcbdadedf88c3150252bed7b2087075ac99735403b1b76cc8fc0 \
     --hash=sha256:b9db9dd147c91cb8b769f7183535773d8741dd46f9dc6676cd82eab510228cd7
-    # via
-    #   -r requirements.in
-    #   fastapi-cli
+    # via -r requirements.in
 fastapi-cli==0.0.4 \
     --hash=sha256:a2552f3a7ae64058cdbb530be6fa6dbfc975dc165e4fa66d224c3d396e25e809 \
     --hash=sha256:e2e9ffaffc1f7767f488d6da34b6f5a377751c996f397902eb6abb99a67bde32
@@ -1159,7 +1157,6 @@ uvicorn[standard]==0.30.1 \
     # via
     #   -r requirements.in
     #   fastapi
-    #   fastapi-cli
 uvloop==0.19.0 \
     --hash=sha256:0246f4fd1bf2bf702e06b0d45ee91677ee5c31242f39aab4ea6fe0c51aedd0fd \
     --hash=sha256:02506dc23a5d90e04d4f65c7791e65cf44bd91b37f24cfc3ef6cf2aff05dc7ec \
