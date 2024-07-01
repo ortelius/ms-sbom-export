@@ -77,6 +77,10 @@ compid?: Partial(string) & Partial(null)
 appid?: Partial(string) & Partial(null)
 ```
 
+```ts
+envid?: Partial(string) & Partial(null)
+```
+
 #### Responses
 
 - 200 Successful Response
