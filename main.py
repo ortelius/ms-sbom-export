@@ -198,8 +198,38 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None,
                     if envid is not None:
                         single_param = (str(envid),)
 
+                        compsql = """
+                                    WITH ranked_applist AS (
+                                        SELECT
+                                            id,
+                                            name,
+                                            created,
+                                            parentid,
+                                            predecessorid,
+                                            environment_name,
+                                            deploymentid,
+                                            finishts,
+                                            exitcode,
+                                            domainid,
+                                            predecessor_name,
+                                            fullname,
+                                            ROW_NUMBER() OVER (PARTITION BY parentid ORDER BY created DESC) AS rn
+                                        FROM
+                                            dm_applist
+                                    )
+                                    SELECT DISTINCT
+                                        c.compid
+                                    FROM
+                                        ranked_applist a, dm.dm_deployment b, dm.dm_deploymentcomps c
+                                    WHERE
+                                    rn = 1
+                                    and a.deploymentid > 0
+                                    and b.envid = %s
+                                    and a.deploymentid = b.deploymentid
+                                    and a.deploymentid = c.deploymentid
+                                    """
                         cursor.execute(
-                            "select distinct compid from dm.dm_applicationcomponent a, dm.dm_component b, dm.dm_deployment c where c.envid = %s and c.appid = a.appid and a.compid = b.id and b.status = 'N'",
+                            compsql,
                             single_param,
                         )
                         rows = cursor.fetchall()
@@ -216,7 +246,7 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None,
                             else:
                                 url = url + "?deptype=license&appid=" + ",".join(complist)
 
-                            response = requests.get(url, timeout=20)
+                            response = requests.get(url, timeout=120)
                             response.raise_for_status()
                             data = response.json()
                             rows = data.get("data", None)
@@ -242,7 +272,7 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None,
                             else:
                                 url = url + "?appid=" + ",".join(complist)
 
-                            response = requests.get(url, timeout=20)
+                            response = requests.get(url, timeout=120)
                             response.raise_for_status()
                             data = response.json()
                             rows = data.get("data", None)
@@ -287,59 +317,67 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None,
                         objid = appid
                     elif envid is not None:
                         sqlstmt = """
-                            WITH max_deployment_ids AS (
-                                SELECT
-                                    e.appid,
-                                    e.envid,
-                                    MAX(e.deploymentid) AS max_deploymentid
+                                WITH ranked_applist AS (
+                                    SELECT
+                                        id,
+                                        name,
+                                        created,
+                                        parentid,
+                                        predecessorid,
+                                        environment_name,
+                                        deploymentid,
+                                        finishts,
+                                        exitcode,
+                                        domainid,
+                                        predecessor_name,
+                                        fullname,
+                                        ROW_NUMBER() OVER (PARTITION BY parentid ORDER BY created DESC) AS rn
+                                    FROM
+                                        dm_applist
+                                )
+                                SELECT DISTINCT
+                                    a.name as appname,
+                                    b.deploymentid,
+                                    d.packagename,
+                                    d.packageversion,
+                                    d.name,
+                                    d.url,
+                                    d.summary,
+                                    e.name as compname,
+                                    d.purl,
+                                    d.pkgtype
                                 FROM
-                                    dm.dm_deployment e
-                                WHERE e.envid = :objid
-                                GROUP BY
-                                    e.appid,
-                                    e.envid
-                            )
-                            SELECT
-                                d.name AS appname,
-                                mdi.max_deploymentid AS deploymentid,
-                                b.packagename,
-                                b.packageversion,
-                                b.name,
-                                b.url,
-                                b.summary,
-                                c.name AS compname,
-                                b.purl,
-                                b.pkgtype
-                            FROM
-                                dm.dm_applicationcomponent a
-                                JOIN dm.dm_componentdeps b ON a.compid = b.compid
-                                JOIN dm.dm_component c ON b.compid = c.id
-                                JOIN dm.dm_application d ON d.id = a.appid
-                                JOIN dm.dm_deployment e ON e.appid = d.id
-                                JOIN max_deployment_ids mdi ON e.appid = mdi.appid AND e.envid = mdi.envid AND e.deploymentid = mdi.max_deploymentid
-                                JOIN dm.dm_deploymentcomps f ON e.deploymentid = f.deploymentid AND f.compid = c.id
-                            WHERE
-                                b.deptype = 'license'
-                            UNION
-                            SELECT
-                                d.name AS appname,
-                                mdi.max_deploymentid AS deploymentid,
-                                b.packagename,
-                                b.packageversion,
-                                b.name,
-                                b.url,
-                                b.summary,
-                                c.name AS compname,
-                                b.purl,
-                                b.pkgtype
-                            FROM
-                                dm.dm_applicationcomponent a
-                                JOIN dm_sbom b ON a.compid = b.compid
-                                JOIN dm.dm_component c ON b.compid = c.id
-                                JOIN dm.dm_application d ON d.id = a.appid
-                                JOIN dm.dm_deployment e ON e.appid = d.id
-                                JOIN max_deployment_ids mdi ON e.appid = mdi.appid AND e.envid = mdi.envid AND e.deploymentid = mdi.max_deploymentid
-                                JOIN dm.dm_deploymentcomps f ON e.deploymentid = f.deploymentid AND f.compid = c.id
+                                    ranked_applist a, dm.dm_deployment b, dm.dm_deploymentcomps c, dm.dm_componentdeps d, dm.dm_component e
+                                WHERE
+                                    rn = 1
+                                and a.deploymentid > 0
+                                and b.envid = :objid
+                                and a.deploymentid = b.deploymentid
+                                and a.deploymentid = c.deploymentid
+                                and c.compid = d.compid
+                                and c.compid = e.id
+                                UNION
+                                SELECT DISTINCT
+                                    a.name as appname,
+                                    b.deploymentid,
+                                    d.packagename,
+                                    d.packageversion,
+                                    d.name,
+                                    d.url,
+                                    d.summary,
+                                    e.name as compname,
+                                    d.purl,
+                                    d.pkgtype
+                                FROM
+                                    ranked_applist a, dm.dm_deployment b, dm.dm_deploymentcomps c, dm_sbom d, dm.dm_component e
+                                WHERE
+                                    rn = 1
+                                and a.deploymentid > 0
+                                and b.envid = :objid
+                                and a.deploymentid = b.deploymentid
+                                and a.deploymentid = c.deploymentid
+                                and c.compid = d.compid
+                                and c.compid = e.id
                             """
                         objid = envid
 
