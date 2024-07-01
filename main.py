@@ -132,7 +132,8 @@ async def health(response: Response) -> StatusMsg:
 
 
 @app.get("/msapi/sbom", tags=["sbom"])
-async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None):
+# pylint: disable=C901
+async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None, envid: Optional[str] = None):  # noqa: C901
     """
     This is the end point used to create PDF of the Application/Component SBOM
     """
@@ -142,6 +143,9 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None)
 
     if appid is not None and (appid.startswith("av") or appid.startswith("ap")):
         appid = appid[2:]
+
+    if envid is not None and (envid.startswith("en")):
+        envid = envid[2:]
 
     try:
         # Retry logic for failed query
@@ -191,7 +195,19 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None)
                         for row in rows:
                             complist.append(str(row[0]))
 
-                    if len(deppkg_url) > 0 and (compid is not None or appid is not None):
+                    if envid is not None:
+                        single_param = (str(envid),)
+
+                        cursor.execute(
+                            "select distinct compid from dm.dm_applicationcomponent a, dm.dm_component b, dm.dm_deployment c where c.envid = %s and c.appid = a.appid and a.compid = b.id and b.status = 'N'",
+                            single_param,
+                        )
+                        rows = cursor.fetchall()
+
+                        for row in rows:
+                            complist.append(str(row[0]))
+
+                    if len(deppkg_url) > 0 and (compid is not None or appid is not None or envid is not None):
                         try:
                             url = deppkg_url
 
@@ -248,27 +264,84 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None)
                     objid = compid
                     if compid is not None:
                         sqlstmt = """
-                            SELECT b.packagename, b.packageversion, b.name, b.url, b.summary, c.name as compname, b.purl, b.pkgtype
+                            SELECT '' as appname, 0 as deploymentid, b.packagename, b.packageversion, b.name, b.url, b.summary, c.name as compname, b.purl, b.pkgtype
                             FROM dm_sbom b, dm.dm_component c
                             where b.compid = :objid
                             and b.compid = c.id
                             UNION
-                            SELECT b.packagename, b.packageversion, b.name, b.url, b.summary, c.name as compname, b.purl, b.pkgtype
+                            SELECT '' as appname, 0 as deploymentid, b.packagename, b.packageversion, b.name, b.url, b.summary, c.name as compname, b.purl, b.pkgtype
                             FROM dm.dm_componentdeps b, dm.dm_component c
                             where b.compid = :objid and b.deptype = 'license'
                             and b.compid = c.id
                             """
                     elif appid is not None:
                         sqlstmt = """
-                            select distinct b.packagename, b.packageversion, b.name, b.url, b.summary, c.name as compname, b.purl, b.pkgtype
+                            select distinct '' as appname, 0 as deploymentid,  b.packagename, b.packageversion, b.name, b.url, b.summary, c.name as compname, b.purl, b.pkgtype
                             from dm.dm_applicationcomponent a, dm_sbom b, dm.dm_component c
                             where appid = :objid and a.compid = b.compid and c.id = b.compid
                             union
-                            select distinct b.packagename, b.packageversion, b.name, b.url, b.summary, c.name as compname, b.purl, b.pkgtype
+                            select distinct '' as appname, 0 as deploymentid, b.packagename, b.packageversion, b.name, b.url, b.summary, c.name as compname, b.purl, b.pkgtype
                             from dm.dm_applicationcomponent a, dm.dm_componentdeps b, dm.dm_component c
                             where appid = :objid and a.compid = b.compid and c.id = b.compid and b.deptype = 'license'
                             """
                         objid = appid
+                    elif envid is not None:
+                        sqlstmt = """
+                            WITH max_deployment_ids AS (
+                                SELECT
+                                    e.appid,
+                                    e.envid,
+                                    MAX(e.deploymentid) AS max_deploymentid
+                                FROM
+                                    dm.dm_deployment e
+                                WHERE e.envid = :objid
+                                GROUP BY
+                                    e.appid,
+                                    e.envid
+                            )
+                            SELECT
+                                d.name AS appname,
+                                mdi.max_deploymentid AS deploymentid,
+                                b.packagename,
+                                b.packageversion,
+                                b.name,
+                                b.url,
+                                b.summary,
+                                c.name AS compname,
+                                b.purl,
+                                b.pkgtype
+                            FROM
+                                dm.dm_applicationcomponent a
+                                JOIN dm.dm_componentdeps b ON a.compid = b.compid
+                                JOIN dm.dm_component c ON b.compid = c.id
+                                JOIN dm.dm_application d ON d.id = a.appid
+                                JOIN dm.dm_deployment e ON e.appid = d.id
+                                JOIN max_deployment_ids mdi ON e.appid = mdi.appid AND e.envid = mdi.envid AND e.deploymentid = mdi.max_deploymentid
+                                JOIN dm.dm_deploymentcomps f ON e.deploymentid = f.deploymentid AND f.compid = c.id
+                            WHERE
+                                b.deptype = 'license'
+                            UNION
+                            SELECT
+                                d.name AS appname,
+                                mdi.max_deploymentid AS deploymentid,
+                                b.packagename,
+                                b.packageversion,
+                                b.name,
+                                b.url,
+                                b.summary,
+                                c.name AS compname,
+                                b.purl,
+                                b.pkgtype
+                            FROM
+                                dm.dm_applicationcomponent a
+                                JOIN dm_sbom b ON a.compid = b.compid
+                                JOIN dm.dm_component c ON b.compid = c.id
+                                JOIN dm.dm_application d ON d.id = a.appid
+                                JOIN dm.dm_deployment e ON e.appid = d.id
+                                JOIN max_deployment_ids mdi ON e.appid = mdi.appid AND e.envid = mdi.envid AND e.deploymentid = mdi.max_deploymentid
+                                JOIN dm.dm_deploymentcomps f ON e.deploymentid = f.deploymentid AND f.compid = c.id
+                            """
+                        objid = envid
 
                     df_pkgs = pd.read_sql(sql.text(sqlstmt), connection, params={"objid": objid})
 
@@ -297,12 +370,22 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None)
                         df.drop(["url", "summary", "purl_x", "pkgtype"], axis=1, inplace=True)
 
                         df["risklevel"] = pd.Categorical(df["risklevel"], ["Critical", "High", "Medium", "Low"])
-                        df.sort_values(by=["risklevel", "packagename", "packageversion"], inplace=True)
+
+                        if envid is not None:
+                            df.sort_values(by=["risklevel", "packagename", "packageversion", "appname", "deploymentid"], inplace=True)
+                        else:
+                            df.sort_values(by=["risklevel", "packagename", "packageversion"], inplace=True)
                         df["risklevel"] = df["risklevel"].astype(str)
                         df["risklevel"] = df["risklevel"].replace("nan", "")
-                        df.columns = ["Package", "Version", "License", "Component", "CVE", "Purl", "Description", "Risk Level"]
-                        df = df.reindex(columns=["Package", "Version", "License", "CVE", "Purl", "Description", "Component", "Risk Level"])
-                        df = df.drop("Purl", axis=1)
+
+                        if envid is not None:
+                            df.columns = ["Application", "Deployment", "Package", "Version", "License", "Component", "CVE", "Purl", "Description", "Risk Level"]
+                            df = df.reindex(columns=["Application", "Deployment", "Package", "Version", "License", "CVE", "Purl", "Description", "Component", "Risk Level"])
+                            df = df.drop("Purl", axis=1)
+                        else:
+                            df.columns = ["Application", "Deployment", "Package", "Version", "License", "Component", "CVE", "Purl", "Description", "Risk Level"]
+                            df = df.reindex(columns=["Application", "Deployment", "Package", "Version", "License", "CVE", "Purl", "Description", "Component", "Risk Level"])
+                            df = df.drop(["Application", "Deployment", "Purl"], axis=1)
 
                         df["CVE"] = df["CVE"].apply(lambda x: make_clickable("https://osv.dev/vulnerability/" + x) if len(x) > 0 else x)
 
@@ -348,7 +431,7 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None)
                             str(compid),
                             str(compid),
                         )
-                    else:
+                    elif appid is not None:
                         single_param = (str(appid),)
                         cursor.execute("select name from dm.dm_application where id = %s", single_param)
                         rows = cursor.fetchall()
@@ -381,78 +464,88 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None)
                             str(appid),
                             str(appid),
                         )
+                    else:
+                        single_param = (str(envid),)
+                        cursor.execute("select name from dm.dm_environment where id = %s", single_param)
+                        rows = cursor.fetchall()
+                        for row in rows:
+                            objname = "Environment<br>" + row[0]
 
-                    cursor.execute(sqlstmt, params)
-                    rows = cursor.fetchall()
+                        sqlstmt = ""
+
                     comptable = ""
-                    for row in rows:
-                        compname = row[0]
-                        buildid = row[4]
-                        buildurl = row[5]
-                        chart = row[6]
-                        builddate = row[7]
-                        dockerrepo = row[8]
-                        dockersha = row[9]
-                        gitcommit = row[10]
-                        gitrepo = row[11]
-                        gittag = row[12]
-                        giturl = row[13]
-                        chartversion = row[14]
-                        chartnamespace = row[15]
-                        dockertag = row[16]
-                        chartrepo = row[17]
-                        chartrepourl = row[18]
-                        serviceowner = row[20]
-                        serviceowneremail = row[21]
-                        serviceownerphone = row[22]
-                        slackchannel = row[23]
-                        discordchannel = row[24]
-                        hipchatchannel = row[25]
-                        pagerdutyurl = row[26]
-                        pagerdutybusinessurl = row[27]
+                    if len(sqlstmt) > 0:
+                        cursor.execute(sqlstmt, params)
+                        rows = cursor.fetchall()
 
-                        comp = f"""
-                            <div style="width: 100%;"><h3>{compname}</h3>
-                                <div id="compsum" style="width: 50%; float: left;">
-                                    <table id="compowner_summ" class="dev-table">
-                                        <tr id="serviceowner_sumrow"><td class="summlabel">Service Owner:</td><td class="summval">{serviceowner}</td></tr>
-                                        <tr id="serviceowneremail_sumrow"><td class="summlabel">Service Owner Email:</td><td class="summval">{serviceowneremail}</td></tr>
-                                        <tr id="serviceownerphone_sumrow"><td class="summlabel">Service Owner Phone:</td><td class="summval">{serviceownerphone}</td></tr>
-                                        <tr id="pagerdutybusinessserviceurl_sumrow"><td class="summlabel">PagerDuty Business Service Url:</td><td class="summval">{pagerdutybusinessurl}</td></tr>
-                                        <tr id="pagerdutyserviceurl_sumrow"><td class="summlabel">PagerDuty Service Url:</td><td class="summval">{pagerdutyurl}</td></tr>
-                                        <tr id="slackchannel_sumrow"><td class="summlabel">Slack Channel:</td><td class="summval">{slackchannel}</td></tr>
-                                        <tr id="discordchannel_sumrow"><td class="summlabel">Discord Channel:</td><td class="summval">{discordchannel}</td></tr>
-                                        <tr id="hipchatchannel_sumrow"><td class="summlabel">HipChat Channel:</td><td class="summval">{hipchatchannel}</td></tr>
-                                        <tr id="gitcommit_sumrow"><td class="summlabel">Git Commit:</td><td class="summval">{gitcommit}</td></tr>
-                                        <tr id="gitrepo_sumrow"><td class="summlabel">Git Repo:</td><td class="summval">{gitrepo}</td></tr>
-                                        <tr id="gittag_sumrow"><td class="summlabel">Git Tag:</td><td class="summval">{gittag}</td></tr>
-                                        <tr id="giturl_sumrow"><td class="summlabel">Git URL:</td><td class="summval">{giturl}</td></tr>
-                                    </table>
+                        for row in rows:
+                            compname = row[0]
+                            buildid = row[4]
+                            buildurl = row[5]
+                            chart = row[6]
+                            builddate = row[7]
+                            dockerrepo = row[8]
+                            dockersha = row[9]
+                            gitcommit = row[10]
+                            gitrepo = row[11]
+                            gittag = row[12]
+                            giturl = row[13]
+                            chartversion = row[14]
+                            chartnamespace = row[15]
+                            dockertag = row[16]
+                            chartrepo = row[17]
+                            chartrepourl = row[18]
+                            serviceowner = row[20]
+                            serviceowneremail = row[21]
+                            serviceownerphone = row[22]
+                            slackchannel = row[23]
+                            discordchannel = row[24]
+                            hipchatchannel = row[25]
+                            pagerdutyurl = row[26]
+                            pagerdutybusinessurl = row[27]
+
+                            comp = f"""
+                                <div style="width: 100%;"><h3>{compname}</h3>
+                                    <div id="compsum" style="width: 50%; float: left;">
+                                        <table id="compowner_summ" class="dev-table">
+                                            <tr id="serviceowner_sumrow"><td class="summlabel">Service Owner:</td><td class="summval">{serviceowner}</td></tr>
+                                            <tr id="serviceowneremail_sumrow"><td class="summlabel">Service Owner Email:</td><td class="summval">{serviceowneremail}</td></tr>
+                                            <tr id="serviceownerphone_sumrow"><td class="summlabel">Service Owner Phone:</td><td class="summval">{serviceownerphone}</td></tr>
+                                            <tr id="pagerdutybusinessserviceurl_sumrow"><td class="summlabel">PagerDuty Business Service Url:</td><td class="summval">{pagerdutybusinessurl}</td></tr>
+                                            <tr id="pagerdutyserviceurl_sumrow"><td class="summlabel">PagerDuty Service Url:</td><td class="summval">{pagerdutyurl}</td></tr>
+                                            <tr id="slackchannel_sumrow"><td class="summlabel">Slack Channel:</td><td class="summval">{slackchannel}</td></tr>
+                                            <tr id="discordchannel_sumrow"><td class="summlabel">Discord Channel:</td><td class="summval">{discordchannel}</td></tr>
+                                            <tr id="hipchatchannel_sumrow"><td class="summlabel">HipChat Channel:</td><td class="summval">{hipchatchannel}</td></tr>
+                                            <tr id="gitcommit_sumrow"><td class="summlabel">Git Commit:</td><td class="summval">{gitcommit}</td></tr>
+                                            <tr id="gitrepo_sumrow"><td class="summlabel">Git Repo:</td><td class="summval">{gitrepo}</td></tr>
+                                            <tr id="gittag_sumrow"><td class="summlabel">Git Tag:</td><td class="summval">{gittag}</td></tr>
+                                            <tr id="giturl_sumrow"><td class="summlabel">Git URL:</td><td class="summval">{giturl}</td></tr>
+                                        </table>
+                                    </div>
+
+                                    <div id="compdetail" style="margin-left: 50%;">
+                                        <table id="compitem" class="dev-table">
+                                            <tr id="builddate_sumrow"><td class="summlabel">Build Date:</td><td class="summval">{builddate}</td></tr>
+                                            <tr id="buildid_sumrow"><td class="summlabel">Build Id:</td><td class="summval">{buildid}</td></tr>
+                                            <tr id="buildurl_sumrow"><td class="summlabel">Build URL:</td><td class="summval">{buildurl}</td></tr>
+                                            <tr id="containerregistry_sumrow"><td class="summlabel">Container Registry:</td><td class="summval">{dockerrepo}</td></tr>
+                                            <tr id="containerdigest_sumrow"><td class="summlabel">Container Digest:</td><td class="summval">{dockersha}</td></tr>
+                                            <tr id="containertag_sumrow"><td class="summlabel">Container Tag:</td><td class="summval">{dockertag}</td></tr>
+                                            <tr id="helmchart_sumrow"><td class="summlabel">Helm Chart:</td><td class="summval">{chart}</td></tr>
+                                            <tr id="helmchartnamespace_sumrow"><td class="summlabel">Helm Chart Namespace:</td><td class="summval">{chartnamespace}</td></tr>
+                                            <tr id="helmchartrepo_sumrow"><td class="summlabel">Helm Chart Repo:</td><td class="summval">{chartrepo}</td></tr>
+                                            <tr id="helmchartrepourl_sumrow"><td class="summlabel">Helm Chart Repo Url:</td><td class="summval">{chartrepourl}</td></tr>
+                                            <tr id="helmchartversion_sumrow"><td class="summlabel">Helm Chart Version:</td><td class="summval">{chartversion}</td></tr>
+                                        </table>
+                                    </div>
                                 </div>
+                                <br>
+                            """
+                            comptable = comptable + comp
 
-                                <div id="compdetail" style="margin-left: 50%;">
-                                    <table id="compitem" class="dev-table">
-                                        <tr id="builddate_sumrow"><td class="summlabel">Build Date:</td><td class="summval">{builddate}</td></tr>
-                                        <tr id="buildid_sumrow"><td class="summlabel">Build Id:</td><td class="summval">{buildid}</td></tr>
-                                        <tr id="buildurl_sumrow"><td class="summlabel">Build URL:</td><td class="summval">{buildurl}</td></tr>
-                                        <tr id="containerregistry_sumrow"><td class="summlabel">Container Registry:</td><td class="summval">{dockerrepo}</td></tr>
-                                        <tr id="containerdigest_sumrow"><td class="summlabel">Container Digest:</td><td class="summval">{dockersha}</td></tr>
-                                        <tr id="containertag_sumrow"><td class="summlabel">Container Tag:</td><td class="summval">{dockertag}</td></tr>
-                                        <tr id="helmchart_sumrow"><td class="summlabel">Helm Chart:</td><td class="summval">{chart}</td></tr>
-                                        <tr id="helmchartnamespace_sumrow"><td class="summlabel">Helm Chart Namespace:</td><td class="summval">{chartnamespace}</td></tr>
-                                        <tr id="helmchartrepo_sumrow"><td class="summlabel">Helm Chart Repo:</td><td class="summval">{chartrepo}</td></tr>
-                                        <tr id="helmchartrepourl_sumrow"><td class="summlabel">Helm Chart Repo Url:</td><td class="summval">{chartrepourl}</td></tr>
-                                        <tr id="helmchartversion_sumrow"><td class="summlabel">Helm Chart Version:</td><td class="summval">{chartversion}</td></tr>
-                                    </table>
-                                </div>
-                            </div>
-                            <br>
-                        """
+                        cursor.close()
+                        conn.commit()
 
-                        comptable = comptable + comp
-
-                    cursor.close()
-                    conn.commit()
                     rptdate = datetime.datetime.now().astimezone().strftime("%B %d, %Y at %I:%M %p %Z")
                     cover_url = os.getenv("COVER_URL", "https://www.deployhub.com/downloads/sbom-cover.svg")
 
