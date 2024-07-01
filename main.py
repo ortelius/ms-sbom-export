@@ -33,8 +33,9 @@ from psycopg2.extras import execute_values
 from pydantic import BaseModel
 from sqlalchemy import create_engine, sql, text
 from sqlalchemy.exc import InterfaceError, OperationalError
-from weasyprint import HTML
 from sqlalchemy.orm import sessionmaker
+from weasyprint import HTML
+
 
 def make_clickable(url):
     anchor = url.split("/")[-1]
