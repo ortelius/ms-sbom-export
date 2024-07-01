@@ -34,7 +34,7 @@ from pydantic import BaseModel
 from sqlalchemy import create_engine, sql, text
 from sqlalchemy.exc import InterfaceError, OperationalError
 from weasyprint import HTML
-
+from sqlalchemy.orm import sessionmaker
 
 def make_clickable(url):
     anchor = url.split("/")[-1]
@@ -137,6 +137,9 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None,
     """
     This is the end point used to create PDF of the Application/Component SBOM
     """
+    # Create a session
+    Session = sessionmaker(bind=engine)
+    session = Session()
 
     if compid is not None and (compid.startswith("cv") or compid.startswith("co")):
         compid = compid[2:]
@@ -153,7 +156,7 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None,
         attempt = 1
         while True:
             try:
-                with engine.connect() as connection:
+                with session.connection() as connection:
                     conn = connection.connection
                     cursor = conn.cursor()
 
@@ -171,6 +174,7 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None,
                                 """
 
                     cursor.execute(sqlstmt)
+                    conn.commit()
 
                     sqlstmt = """CREATE TEMPORARY TABLE IF NOT EXISTS dm_vulns
                                 (
@@ -199,35 +203,37 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None,
                         single_param = (str(envid),)
 
                         compsql = """
-                                    WITH ranked_applist AS (
-                                        SELECT
-                                            id,
-                                            name,
-                                            created,
-                                            parentid,
-                                            predecessorid,
-                                            environment_name,
-                                            deploymentid,
-                                            finishts,
-                                            exitcode,
-                                            domainid,
-                                            predecessor_name,
-                                            fullname,
-                                            ROW_NUMBER() OVER (PARTITION BY parentid ORDER BY created DESC) AS rn
-                                        FROM
-                                            dm_applist
-                                    )
-                                    SELECT DISTINCT
-                                        c.compid
+                                select distinct compid from dm.dm_deploymentcomps where deploymentid in (
+                                WITH ranked_applist AS (
+                                    SELECT
+                                        id,
+                                        name,
+                                        created,
+                                        parentid,
+                                        predecessorid,
+                                        environment_name,
+                                        deploymentid,
+                                        finishts,
+                                        exitcode,
+                                        domainid,
+                                        predecessor_name,
+                                        fullname,
+                                        ROW_NUMBER() OVER (PARTITION BY parentid ORDER BY created DESC) AS rn
                                     FROM
-                                        ranked_applist a, dm.dm_deployment b, dm.dm_deploymentcomps c
-                                    WHERE
-                                    rn = 1
-                                    and a.deploymentid > 0
-                                    and b.envid = %s
-                                    and a.deploymentid = b.deploymentid
-                                    and a.deploymentid = c.deploymentid
-                                    """
+                                        dm_applist
+                                )
+                                SELECT DISTINCT
+                                b.deploymentid
+                                FROM
+                                    ranked_applist a
+                                JOIN
+                                    dm.dm_deployment b ON a.deploymentid = b.deploymentid
+                                WHERE
+                                    a.rn = 1
+                                    AND a.deploymentid > 0
+                                and b.envid = %s)
+                                """
+
                         cursor.execute(
                             compsql,
                             single_param,
@@ -258,6 +264,7 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None,
 
                                 # Execute the insert query with execute_values
                                 execute_values(cursor, insert_query, values_list)
+                                conn.commit()
                                 print(data)
                         except requests.exceptions.HTTPError as err:
                             print(f"HTTP error occurred: {err}")
