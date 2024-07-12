@@ -917,9 +917,9 @@ pydantic-core==2.20.1 \
     --hash=sha256:fa2fddcb7107e0d1808086ca306dcade7df60a13a6c347a7acf1ec139aa6789a \
     --hash=sha256:faa6b09ee09433b87992fb5a2859efd1c264ddc37280d2dd5db502126d0e7f27
     # via pydantic
-pydyf==0.10.0 \
-    --hash=sha256:357194593efaf61d7b48ab97c3d59722114934967c3df3d7878ca6dd25b04c30 \
-    --hash=sha256:ef76b6c0976a091a9e15827fb5800e5e37e7cd1a3ca4d4bd19d10a14ea8c0ae3
+pydyf==0.11.0 \
+    --hash=sha256:0aaf9e2ebbe786ec7a78ec3fbffa4cdcecde53fd6f563221d53c6bc1328848a3 \
+    --hash=sha256:394dddf619cca9d0c55715e3c55ea121a9bf9cbc780cdc1201a2427917b86b64
     # via weasyprint
 pygments==2.18.0 \
     --hash=sha256:786ff802f32e91311bff3889f6e9a86e81505fe99f2735bb6d60ae0c5004f199 \
