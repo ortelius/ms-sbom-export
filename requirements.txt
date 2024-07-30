@@ -925,9 +925,9 @@ pygments==2.18.0 \
     --hash=sha256:786ff802f32e91311bff3889f6e9a86e81505fe99f2735bb6d60ae0c5004f199 \
     --hash=sha256:b8e6aca0523f3ab76fee51799c488e38782ac06eafcf95e7ba832985c8e7b13a
     # via rich
-pyphen==0.15.0 \
-    --hash=sha256:999b430916ab42ae9912537cd95c074e0c6691e89a9d05999f9b610a68f34858 \
-    --hash=sha256:a430623decac53dc3691241253263cba36b9dd7a44ffd2680b706af368cda2f2
+pyphen==0.16.0 \
+    --hash=sha256:2c006b3ddf072c9571ab97606d9ab3c26a92eaced4c0d59fd1d26988f308f413 \
+    --hash=sha256:b4a4c6d7d5654b698b5fc68123148bb799b3debe0175d1d5dc3edfe93066fc4c
     # via weasyprint
 python-dateutil==2.9.0.post0 \
     --hash=sha256:37dd54208da7e1cd875388217d5e00ebd4179249f90fb72437e91a35459a0ad3 \
