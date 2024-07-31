@@ -2,7 +2,7 @@ fastapi==0.111.1
 psycopg2_binary==2.9.9
 pydantic==2.8.2
 SQLAlchemy==2.0.31
-uvicorn==0.30.3
+uvicorn==0.30.4
 requests==2.32.3
 numpy==2.0.1
 pandas==2.2.2
