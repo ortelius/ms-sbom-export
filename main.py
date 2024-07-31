@@ -610,7 +610,7 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None,
 
                     .rptdate {{
                         position: relative;
-                        top: -265px;
+                        bottom: 300px;
                         left: 72%;
                         font-size: 3em;
                         color: white;
@@ -618,7 +618,7 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None,
 
                     .objname {{
                         position: relative;
-                        top: -200px;
+                        bottom: 180px;
                         font-size: 3em;
                         left: 15px;
                         color: white;
@@ -1255,9 +1255,9 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None,
                                 </g>
                             </g>
                             </svg>
+                            <div class="objname">{objname}</div>
+                            <p class="rptdate">{rptdate}</p>
                         </div>
-                        <div class="objname">{objname}</div>
-                        <p class="rptdate">{rptdate}</p>
                     </div>
                 </div>
         """  # nosec
