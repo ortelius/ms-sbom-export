@@ -6,7 +6,8 @@
       "type": "debugpy",
       "request": "launch",
       "program": "${file}",
-      "console": "integratedTerminal"
+      "console": "integratedTerminal",
+      "env": {"DB_PASS": "InS0mn1a+15", "DB_PORT": "55432"}
     }
   ]
 }
