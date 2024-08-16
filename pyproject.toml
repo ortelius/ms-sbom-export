@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "ms-sbom-export"
+version = "0.1.0"
+description = ""
+authors = ["Steve Taylor <steve@deployhub.com>"]
+license = "Apache-2"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "0.112.0"
+psycopg2-binary = "2.9.9"
+pydantic = "2.8.2"
+sqlalchemy = "2.0.32"
+uvicorn = "0.30.6"
+requests = "2.32.3"
+numpy = "2.0.1"
+pandas = "2.2.2"
+weasyprint = "62.3"
+starlette = "0.37.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
