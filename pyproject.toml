@@ -8,7 +8,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-fastapi = "0.112.0"
+fastapi = "0.112.1"
 psycopg2-binary = "2.9.9"
 pydantic = "2.8.2"
 sqlalchemy = "2.0.32"
@@ -17,7 +17,7 @@ requests = "2.32.3"
 numpy = "2.0.1"
 pandas = "2.2.2"
 weasyprint = "62.3"
-starlette = "0.37.2"
+starlette = "0.38.2"
 
 
 [build-system]
