@@ -439,13 +439,13 @@ test = ["flake8", "isort", "pytest"]
 
 [[package]]
 name = "fastapi"
-version = "0.115.7"
+version = "0.115.8"
 description = "FastAPI framework, high performance, easy to learn, fast to code, ready for production"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "fastapi-0.115.7-py3-none-any.whl", hash = "sha256:eb6a8c8bf7f26009e8147111ff15b5177a0e19bb4a45bc3486ab14804539d21e"},
-    {file = "fastapi-0.115.7.tar.gz", hash = "sha256:0f106da6c01d88a6786b3248fb4d7a940d071f6f488488898ad5d354b25ed015"},
+    {file = "fastapi-0.115.8-py3-none-any.whl", hash = "sha256:753a96dd7e036b34eeef8babdfcfe3f28ff79648f86551eb36bfc1b0bf4a8cbf"},
+    {file = "fastapi-0.115.8.tar.gz", hash = "sha256:0ce9111231720190473e222cdf0f07f7206ad7e53ea02beb1d2dc36e2f0741e9"},
 ]
 
 [package.dependencies]
@@ -1391,13 +1391,13 @@ standard = ["colorama (>=0.4)", "httptools (>=0.6.3)", "python-dotenv (>=0.13)",
 
 [[package]]
 name = "weasyprint"
-version = "63.1"
+version = "64.0"
 description = "The Awesome Document Factory"
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "weasyprint-63.1-py3-none-any.whl", hash = "sha256:9d0319fe3ba553c9a77dc43a2d35b64a70c2b8809ad55a139a214803fde62bce"},
-    {file = "weasyprint-63.1.tar.gz", hash = "sha256:cb424e63e8dd3f14195bfe5f203527646aa40a2f00ac819f9d39b8304cec0044"},
+    {file = "weasyprint-64.0-py3-none-any.whl", hash = "sha256:2ef5539fc05a5d3b4fbee93c87fc20be93345c33895f280076c38071797eadef"},
+    {file = "weasyprint-64.0.tar.gz", hash = "sha256:1ceb3ea6306db4a3d06df0eafae3a5a6e879c35c40091aa8ceb5bcb143e80b29"},
 ]
 
 [package.dependencies]
@@ -1411,7 +1411,7 @@ tinycss2 = ">=1.4.0"
 tinyhtml5 = ">=2.0.0b1"
 
 [package.extras]
-doc = ["sphinx", "sphinx_rtd_theme"]
+doc = ["furo", "sphinx"]
 test = ["pytest", "ruff"]
 
 [[package]]
@@ -1501,4 +1501,4 @@ test = ["pytest"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "4f48b6e85b70646398fc7f441f204ae12408ab5595209cec51727e4ba8d6962a"
+content-hash = "c1aaa65efe61e5998f3741875e9fc00180e9e70f1daafe6aa0e611f074a0191d"
