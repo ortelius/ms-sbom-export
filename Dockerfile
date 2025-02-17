@@ -14,11 +14,11 @@ RUN dnf install -y python3.11 pango wget python3-cairo; \
     dnf upgrade -y; \
     dnf clean all;
 
-ENV DB_HOST localhost
-ENV DB_NAME postgres
-ENV DB_USER postgres
-ENV DB_PASS postgres
-ENV DB_PORT 5432
-ENV COVER_URL https://ortelius.io/images/sbom-cover.svg
+ENV DB_HOST=localhost
+ENV DB_NAME=postgres
+ENV DB_USER=postgres
+ENV DB_PASS=postgres
+ENV DB_PORT=5432
+ENV COVER_URL=https://ortelius.io/images/sbom-cover.svg
 
 ENTRYPOINT ["poetry", "run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
