@@ -17,7 +17,7 @@ requests = "2.32.3"
 numpy = "2.2.3"
 pandas = "2.2.3"
 weasyprint = "64.1"
-starlette = "0.46.0"
+starlette = "0.46.1"
 
 
 [build-system]
