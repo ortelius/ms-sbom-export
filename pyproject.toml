@@ -16,7 +16,7 @@ uvicorn = "0.34.1"
 requests = "2.32.3"
 numpy = "2.2.4"
 pandas = "2.2.3"
-weasyprint = "65.0"
+weasyprint = "65.1"
 starlette = "0.46.2"
 
 
