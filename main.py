@@ -226,7 +226,7 @@ async def export_sbom(compid: Optional[str] = None, appid: Optional[str] = None,
                                         ROW_NUMBER() OVER (PARTITION BY parentid ORDER BY created DESC) AS rn
                                     FROM
                                         dm.dm_applist
-                                    where b.envid = %s
+                                    where envid = %s
                                 )
                                 SELECT DISTINCT
                                     b.deploymentid
