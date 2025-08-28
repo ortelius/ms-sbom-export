@@ -7,9 +7,9 @@ WORKDIR /app
 ENV PATH=/root/.local/bin:$PATH
 
 # hadolint ignore=DL3041,DL4006
-RUN dnf install -y python3.11 pango wget python3-cairo; \
-    wget -q -O - https://install.python-poetry.org | python3.11 -; \
-    poetry env use python3.11; \
+RUN dnf install -y python3.12 pango wget python3-cairo; \
+    wget -q -O - https://install.python-poetry.org | python3.12 -; \
+    poetry env use python3.12; \
     poetry install --no-root; \
     dnf upgrade -y; \
     dnf clean all;
