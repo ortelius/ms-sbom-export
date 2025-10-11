@@ -41,6 +41,9 @@ RestAPI endpoint for retrieving SBOM data to a component
 - Summary  
 Health
 
+- Operation id  
+health_health_get
+
 - Description  
 This health check end point used by Kubernetes
 
@@ -50,7 +53,7 @@ This health check end point used by Kubernetes
 
 `application/json`
 
-```ts
+```typescript
 {
   status?: string
   service_name?: string
@@ -64,20 +67,23 @@ This health check end point used by Kubernetes
 - Summary  
 Export Sbom
 
+- Operation id  
+export_sbom_msapi_sbom_get
+
 - Description  
 This is the end point used to create PDF of the Application/Component SBOM
 
 #### Parameters(Query)
 
-```ts
+```typescript
 compid?: Partial(string) & Partial(null)
 ```
 
-```ts
+```typescript
 appid?: Partial(string) & Partial(null)
 ```
 
-```ts
+```typescript
 envid?: Partial(string) & Partial(null)
 ```
 
@@ -87,7 +93,7 @@ envid?: Partial(string) & Partial(null)
 
 `application/json`
 
-```ts
+```typescript
 {}
 ```
 
@@ -95,7 +101,7 @@ envid?: Partial(string) & Partial(null)
 
 `application/json`
 
-```ts
+```typescript
 {
   detail: {
     loc?: Partial(string) & Partial(integer)[]
@@ -109,7 +115,7 @@ envid?: Partial(string) & Partial(null)
 
 ### #/components/schemas/HTTPValidationError
 
-```ts
+```typescript
 {
   detail: {
     loc?: Partial(string) & Partial(integer)[]
@@ -121,7 +127,7 @@ envid?: Partial(string) & Partial(null)
 
 ### #/components/schemas/StatusMsg
 
-```ts
+```typescript
 {
   status?: string
   service_name?: string
@@ -130,7 +136,7 @@ envid?: Partial(string) & Partial(null)
 
 ### #/components/schemas/ValidationError
 
-```ts
+```typescript
 {
   loc?: Partial(string) & Partial(integer)[]
   msg: string
