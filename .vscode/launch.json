@@ -7,7 +7,7 @@
       "request": "launch",
       "program": "${file}",
       "console": "integratedTerminal",
-      "env": {"DB_PASS": "InS0mn1a+15", "DB_PORT": "55432"}
+      "env": { "DB_PASS": "InS0mn1a+15", "DB_PORT": "55432" }
     }
   ]
 }
