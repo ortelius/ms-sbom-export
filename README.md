@@ -19,18 +19,18 @@ RestAPI endpoint for retrieving SBOM data to a component
 
 ## Path Table
 
-| Method | Path                         | Description |
-|--------|------------------------------|-------------|
-| GET    | [/health](#gethealth)        | Health      |
-| GET    | [/msapi/sbom](#getmsapisbom) | Export Sbom |
+| Method | Path | Description |
+| --- | --- | --- |
+| GET | [/health](#gethealth) | Health |
+| GET | [/msapi/sbom](#getmsapisbom) | Export Sbom |
 
 ## Reference Table
 
-| Name                | Path                                                                              | Description |
-|---------------------|-----------------------------------------------------------------------------------|-------------|
-| HTTPValidationError | [#/components/schemas/HTTPValidationError](#componentsschemashttpvalidationerror) |             |
-| StatusMsg           | [#/components/schemas/StatusMsg](#componentsschemasstatusmsg)                     |             |
-| ValidationError     | [#/components/schemas/ValidationError](#componentsschemasvalidationerror)         |             |
+| Name | Path | Description |
+| --- | --- | --- |
+| HTTPValidationError | [#/components/schemas/HTTPValidationError](#componentsschemashttpvalidationerror) |  |
+| StatusMsg | [#/components/schemas/StatusMsg](#componentsschemasstatusmsg) |  |
+| ValidationError | [#/components/schemas/ValidationError](#componentsschemasvalidationerror) |  |
 
 ## Path Details
 
